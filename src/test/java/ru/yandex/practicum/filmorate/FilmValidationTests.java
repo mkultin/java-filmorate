@@ -66,7 +66,8 @@ public class FilmValidationTests {
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertEquals(0, violations.size());
         film.setReleaseDate(LocalDate.of(1894, 1, 1));
-        assertThrows(ValidationException.class, () -> filmController.create(film));
+        violations = validator.validate(film);
+        assertEquals(1, violations.size());
     }
 
     @Test

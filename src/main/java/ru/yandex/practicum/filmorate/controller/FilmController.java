@@ -6,46 +6,36 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.*;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-    private final HashMap<Integer, Film> films = new HashMap<>();
+    private final Map<Integer, Film> films = new HashMap<>();
     private Integer id = 1;
 
     @GetMapping
-    public Collection<Film> getFilms() {
-        return films.values();
+    public List<Film> getFilms() {
+        return new ArrayList<>(films.values());
     }
 
     @PostMapping
-    public Film create(@Valid @RequestBody Film film) throws ValidationException {
-        if (film.getReleaseDate() != null && film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
-        } else {
-            film.setId(id++);
-            films.put(film.getId(), film);
-            log.info("Добавлен новый фильм {}, id={}", film.getName(), film.getId());
-        }
+    public Film create(@Valid @RequestBody Film film) {
+        film.setId(id++);
+        films.put(film.getId(), film);
+        log.info("Добавлен новый фильм {}, id={}", film.getName(), film.getId());
         return film;
     }
 
     @PutMapping
-    public Film updateFilm(@Valid @RequestBody Film film) throws ValidationException {
-        if (film.getReleaseDate() != null && film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года");
+    public Film updateFilm(@Valid @RequestBody Film film) {
+        if (films.containsKey(film.getId())) {
+            films.remove(film.getId());
+            films.put(film.getId(), film);
+            log.info("Обновлен фильм {}, id={}", film.getName(), film.getId());
         } else {
-            if (films.containsKey(film.getId())) {
-                films.remove(film.getId());
-                films.put(film.getId(), film);
-                log.info("Обновлен фильм {}, id={}", film.getName(), film.getId());
-            } else {
-                throw new ValidationException("Фильм с указанным id не найден.");
-            }
+            throw new ValidationException("Фильм с указанным id не найден.");
         }
         return film;
     }

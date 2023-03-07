@@ -6,26 +6,23 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.*;
 
 @RestController
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    private final HashMap<Integer, User> users = new HashMap<>();
+    private final Map<Integer, User> users = new HashMap<>();
     private Integer id = 1;
 
     @GetMapping
-    public Collection<User> getFilms() {
-        return users.values();
+    public List<User> getFilms() {
+        return new ArrayList<>(users.values());
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        if (user.getName() == null || user.getName().equals("")) {
-            user.setName(user.getLogin());
-        }
+        validateName(user);
         user.setId(id++);
         users.put(user.getId(), user);
         log.info("Создан новый пользователь {}, id={}", user.getName(), user.getId());
@@ -33,16 +30,20 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateFilm(@Valid @RequestBody User user) throws ValidationException {
+    public User updateFilm(@Valid @RequestBody User user) {
         if (users.containsKey(user.getId())) {
-            if (user.getName() == null || user.getName().equals("")) {
-                user.setName(user.getLogin());
-            }
+            validateName(user);
             users.put(user.getId(), user);
             log.info("Пользователь id={} обновлен: {}", user.getId(), user.getName());
         } else {
             throw new ValidationException("Пользователь с таким id не найден.");
         }
         return user;
+    }
+
+    private void validateName(User user) {
+        if (user.getName() == null || user.getName().equals("")) {
+            user.setName(user.getLogin());
+        }
     }
 }

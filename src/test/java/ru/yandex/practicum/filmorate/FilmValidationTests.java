@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -26,8 +28,8 @@ public class FilmValidationTests {
 
     @BeforeEach
     void beforeEach() throws ValidationException {
-        filmController = new FilmController();
-        film = filmController.create(Film.builder()
+        filmController = new FilmController(new FilmService(new InMemoryFilmStorage()));
+        film = filmController.addFilm(Film.builder()
                 .name("Film1")
                 .description("Description1")
                 .releaseDate(LocalDate.of(2000, 1, 1))

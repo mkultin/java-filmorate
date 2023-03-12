@@ -7,13 +7,15 @@ import ru.yandex.practicum.filmorate.validation.ReleaseDate;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Slf4j
 @Builder
 public class Film {
     @Positive(message = "Id некорректный.")
-    private Integer id;
+    private Long id;
     @NotBlank(message = "Название не может быть пустым.")
     private String name;
     @Size(max = 200, message = "Максимальная длина описания — 200 символов.")
@@ -22,4 +24,5 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма должна быть положительной.")
     private Integer duration;
+    private final Set<Long> likes = new HashSet<>();
 }

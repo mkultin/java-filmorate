@@ -43,6 +43,7 @@ public class UserService {
         if (user != null && friendUser != null) {
             user.getFriends().add(friendId);
             friendUser.getFriends().add(id);
+            log.info("Для пользователя id={} добавлен друг id={}", id, friendId);
         } else {
             throw new UserNotFoundException("Передан несущетвующий id");
         }
@@ -54,6 +55,7 @@ public class UserService {
         if (user != null && friendUser != null) {
             user.getFriends().remove(friendId);
             friendUser.getFriends().remove(id);
+            log.info("У пользователя id={} удален друг id={}", id, friendId);
         } else {
             throw new UserNotFoundException("Передан несущетвующий id");
         }

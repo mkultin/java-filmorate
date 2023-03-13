@@ -14,7 +14,8 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class UserService {
-    UserStorage userStorage;
+    private final UserStorage userStorage;
+    private static final String ERROR_MESSAGE = "Передан несущетвующий id";
 
     @Autowired
     public UserService(InMemoryUserStorage inMemoryUserStorage) {
@@ -45,7 +46,7 @@ public class UserService {
             friendUser.getFriends().add(id);
             log.info("Для пользователя id={} добавлен друг id={}", id, friendId);
         } else {
-            throw new UserNotFoundException("Передан несущетвующий id");
+            throw new UserNotFoundException(ERROR_MESSAGE);
         }
     }
 
@@ -57,7 +58,7 @@ public class UserService {
             friendUser.getFriends().remove(id);
             log.info("У пользователя id={} удален друг id={}", id, friendId);
         } else {
-            throw new UserNotFoundException("Передан несущетвующий id");
+            throw new UserNotFoundException(ERROR_MESSAGE);
         }
     }
 
@@ -67,7 +68,7 @@ public class UserService {
             Set<Long> friends = user.getFriends();
             return userStorage.getUsersByIds(friends);
         } else {
-            throw new UserNotFoundException("Передан несущетвующий id");
+            throw new UserNotFoundException(ERROR_MESSAGE);
         }
     }
 
@@ -82,7 +83,7 @@ public class UserService {
                     .collect(Collectors.toSet());
             return userStorage.getUsersByIds(commonFriends);
         } else {
-            throw new UserNotFoundException("Передан несущетвующий id");
+            throw new UserNotFoundException(ERROR_MESSAGE);
         }
     }
 }

@@ -27,7 +27,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (films.containsKey(id)) {
             return films.get(id);
         } else {
-            throw new FilmNotFoundException("Фильм с указанным id не найден.");
+            throw new FilmNotFoundException("Фильм с id= " + id + "не найден.");
         }
     }
 
@@ -46,7 +46,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             films.put(film.getId(), film);
             log.info("Обновлен фильм {}, id={}", film.getName(), film.getId());
         } else {
-            throw new FilmNotFoundException("Фильм с указанным id не найден.");
+            throw new FilmNotFoundException("Фильм с id= " + film.getId() + "не найден.");
         }
         return film;
     }
@@ -57,7 +57,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             films.remove(id);
             log.info("Удален фильм id={}", id);
         } else {
-            throw new FilmNotFoundException("Фильм с указанным id не найден.");
+            throw new FilmNotFoundException("Фильм с id= " + id + "не найден.");
         }
     }
 }

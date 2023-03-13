@@ -55,7 +55,7 @@ public class InMemoryUserStorage implements UserStorage {
             users.put(user.getId(), user);
             log.info("Пользователь id={} обновлен: {}", user.getId(), user.getName());
         } else {
-            throw new UserNotFoundException("Пользователь не найден.");
+            throw new UserNotFoundException("Пользователь id=" + user.getId() + "не найден.");
         }
         return user;
     }
@@ -66,7 +66,7 @@ public class InMemoryUserStorage implements UserStorage {
             users.remove(id);
             log.info("Пользователь id={} удален", id);
         } else {
-            throw new ValidationException("Пользователь не найден.");
+            throw new ValidationException("Пользователь id=" + id + "не найден.");
         }
     }
 

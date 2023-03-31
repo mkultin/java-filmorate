@@ -83,7 +83,6 @@ public class FilmDbStorage implements FilmStorage {
         }
         if (film.getGenres() != null) {
             setFilmGenres(film);
-            //film.getGenres().addAll(genreDao.getFilmGenres(film.getId()));
         } else {
             genreDao.deleteFilmGenres(film.getId());
         }

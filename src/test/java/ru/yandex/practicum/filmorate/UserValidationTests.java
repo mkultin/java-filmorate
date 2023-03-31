@@ -10,8 +10,9 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -20,6 +21,7 @@ public class UserValidationTests {
 
     private User firstUser;
     private User secondUser;
+    private User thirdUser;
     private final UserService userService;
 
     @BeforeEach
@@ -37,19 +39,35 @@ public class UserValidationTests {
                 .name("Second Name")
                 .birthday(LocalDate.of(1998, 8, 8))
                 .build();
+
+        thirdUser = User.builder()
+                .email("third@user.ru")
+                .login("third_user")
+                .name("Third Name")
+                .birthday(LocalDate.of(1997, 7, 7))
+                .build();
     }
 
     @Test
-    public void createAndGetUsers() {
+    public void shouldGetUserById() {
         userService.addUser(firstUser);
         User user = userService.getUserById(1L);
-
-        assertEquals(1, user.getId());
+        assertThat(user).isNotNull();
+        assertThat(user.getId()).isEqualTo(1);
 
         userService.addUser(secondUser);
         user = userService.getUserById(2L);
+        assertThat(user).isNotNull();
+        assertThat(user.getId()).isEqualTo(2);
+    }
 
-        assertEquals(2, user.getId());
+    @Test
+    public void shouldGetUsers() {
+        userService.addUser(firstUser);
+        userService.addUser(secondUser);
+        List<User> users = userService.getUsers();
+        assertThat(users).contains(firstUser);
+        assertThat(users).contains(secondUser);
     }
 
     @Test
@@ -66,7 +84,35 @@ public class UserValidationTests {
 
         User updUser = userService.getUserById(1L);
 
-        assertEquals(userToUpd.getId(), updUser.getId());
-        assertEquals(userToUpd.getName(), updUser.getName());
+        assertThat(updUser).isNotNull();
+        assertThat(updUser.getId()).isEqualTo(userToUpd.getId());
+        assertThat(updUser.getName()).isEqualTo(userToUpd.getName());
+    }
+
+    @Test
+    public void shouldAddGetAndDeleteFriends() {
+        userService.addUser(firstUser);
+        userService.addUser(secondUser);
+        userService.addUser(thirdUser);
+        userService.addFriend(firstUser.getId(), secondUser.getId());
+
+        List<User> friends = userService.getFriends(firstUser.getId());
+        assertThat(friends.size()).isEqualTo(1);
+
+        userService.addFriend(firstUser.getId(), thirdUser.getId());
+
+        friends = userService.getFriends(firstUser.getId());
+        assertThat(friends.size()).isEqualTo(2);
+
+        userService.addFriend(secondUser.getId(), firstUser.getId());
+        userService.addFriend(secondUser.getId(), thirdUser.getId());
+
+        List<User> commonFriends = userService.getCommonFriends(firstUser.getId(), secondUser.getId());
+        assertThat(commonFriends.size()).isEqualTo(1);
+
+        userService.deleteFriend(firstUser.getId(), thirdUser.getId());
+
+        friends = userService.getFriends(firstUser.getId());
+        assertThat(friends.size()).isEqualTo(1);
     }
 }

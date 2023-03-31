@@ -9,7 +9,7 @@ public interface FriendDao {
 
     void addFriend(User user, User friend);
 
-    void deleteFriend(User user, User Friend);
+    void deleteFriend(User user, User friend);
 
     Set<Long> getFriends(Long id);
 

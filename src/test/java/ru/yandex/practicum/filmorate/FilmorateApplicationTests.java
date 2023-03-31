@@ -1,5 +1,5 @@
 package ru.yandex.practicum.filmorate;
 
-class FilmoRateApplicationTests {
+public class FilmoRateApplicationTests {
 
 }

@@ -8,6 +8,8 @@ import ru.yandex.practicum.filmorate.validation.ReleaseDate;
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -25,4 +27,16 @@ public class Film {
     @Positive(message = "Продолжительность фильма должна быть положительной.")
     private Integer duration;
     private final Set<Long> likes = new HashSet<>();
+    private Mpa mpa;
+    private final Set<Genre> genres = new LinkedHashSet<>();
+
+    public Map<String, Object> toMap() {
+        return Map.of(
+                "name", name,
+                "description", description,
+                "release_date", releaseDate,
+                "duration", duration,
+                "rating_id", mpa.getId()
+        );
+    }
 }

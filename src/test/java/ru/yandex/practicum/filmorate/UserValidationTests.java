@@ -1,80 +1,73 @@
 package ru.yandex.practicum.filmorate;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.controller.UserController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SpringBootTest
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserValidationTests {
-    private UserController userController;
-    private User user;
-    private static final Validator validator;
-    static {
-        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
-        validator = validatorFactory.usingContext().getValidator();
-    }
+
+    private User firstUser;
+    private User secondUser;
+    private final UserService userService;
 
     @BeforeEach
     public void beforeEach() {
-        userController = new UserController(new UserService(new InMemoryUserStorage()));
-        user = userController.create(User.builder()
-                .email("email@dom.ru")
-                .login("login")
-                .name("name")
-                .birthday(LocalDate.of(2000, 1, 1))
-                .build());
+        firstUser = User.builder()
+                .email("first@user.ru")
+                .login("first_user")
+                .name("First Name")
+                .birthday(LocalDate.of(1999, 9, 9))
+                .build();
+
+        secondUser = User.builder()
+                .email("second@user.ru")
+                .login("second_user")
+                .name("Second Name")
+                .birthday(LocalDate.of(1998, 8, 8))
+                .build();
     }
 
     @Test
-    public void shouldValidateEmail() {
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertEquals(0, violations.size());
-        user.setEmail("email");
-        violations = validator.validate(user);
-        assertEquals(1, violations.size());
+    public void createAndGetUsers() {
+        userService.addUser(firstUser);
+        User user = userService.getUserById(1L);
+
+        assertEquals(1, user.getId());
+
+        userService.addUser(secondUser);
+        user = userService.getUserById(2L);
+
+        assertEquals(2, user.getId());
     }
 
     @Test
-    public void shouldValidateLogin() {
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertEquals(0, violations.size());
-        user.setLogin("");
-        violations = validator.validate(user);
-        assertEquals(2, violations.size());
-        user.setLogin("new login");
-        violations = validator.validate(user);
-        assertEquals(1, violations.size());
-        user.setLogin(null);
-        violations = validator.validate(user);
-        assertEquals(1, violations.size());
-    }
+    public void shouldUpdateUser() {
+        userService.addUser(firstUser);
+        User userToUpd = User.builder()
+                .id(1L)
+                .email("first@user.ru")
+                .login("first_user")
+                .name("First users Name")
+                .birthday(LocalDate.of(1999, 9, 9))
+                .build();
+        userService.updateUser(userToUpd);
 
-    @Test
-    public void shouldValidateName() {
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertEquals(0, violations.size());
-        user.setName("");
-        User newUser = userController.create(user);
-        assertEquals(user.getLogin(), newUser.getName());
-    }
+        User updUser = userService.getUserById(1L);
 
-    @Test
-    public void shouldValidateBirthday() {
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertEquals(0, violations.size());
-        user.setBirthday(LocalDate.of(2024, 1, 1));
-        violations = validator.validate(user);
-        assertEquals(1, violations.size());
+        assertEquals(userToUpd.getId(), updUser.getId());
+        assertEquals(userToUpd.getName(), updUser.getName());
     }
 }

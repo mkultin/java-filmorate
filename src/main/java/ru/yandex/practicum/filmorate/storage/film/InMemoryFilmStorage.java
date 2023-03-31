@@ -60,4 +60,9 @@ public class InMemoryFilmStorage implements FilmStorage {
             throw new FilmNotFoundException("Фильм с id= " + id + "не найден.");
         }
     }
+
+    @Override
+    public List<Film> getPopularFilms(int count) {
+        return null;
+    }
 }

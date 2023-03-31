@@ -6,9 +6,14 @@ import java.util.List;
 import java.util.Set;
 
 public interface GenreDao {
+
     List<Genre> findAll();
+
     Genre findById(Integer genreId);
+
     Set<Genre> getFilmGenres(Long filmId);
-    void setFilmGenre(Long filmId, Integer genre_id);
+
+    void setFilmGenre(Long filmId, Integer genreId);
+
     void deleteFilmGenres(Long filmId);
 }

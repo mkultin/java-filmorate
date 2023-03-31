@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -13,11 +12,8 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDao;
-import ru.yandex.practicum.filmorate.storage.genre.GenreDaoImpl;
 import ru.yandex.practicum.filmorate.storage.like.LikeDao;
-import ru.yandex.practicum.filmorate.storage.like.LikeDaoImpl;
 import ru.yandex.practicum.filmorate.storage.rating.MpaDao;
-import ru.yandex.practicum.filmorate.storage.rating.MpaDaoImpl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

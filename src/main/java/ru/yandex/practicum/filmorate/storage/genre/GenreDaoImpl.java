@@ -54,10 +54,10 @@ public class GenreDaoImpl implements GenreDao {
     }
 
     @Override
-    public void setFilmGenre(Long filmId, Integer genre_id) {
+    public void setFilmGenre(Long filmId, Integer genreId) {
         String sqlQuery = "INSERT INTO film_genre (film_id, genre_id) " +
                 "VALUES (?, ?)";
-        jdbcTemplate.update(sqlQuery, filmId, genre_id);
+        jdbcTemplate.update(sqlQuery, filmId, genreId);
     }
 
     @Override

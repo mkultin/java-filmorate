@@ -35,7 +35,7 @@ public class MpaDaoImpl implements MpaDao {
         if (mpaId == null) {
             throw new ValidationException("Передан пустой id");
         }
-        String sqlQuery= "SELECT * FROM rating WHERE rating_id = ?";
+        String sqlQuery = "SELECT * FROM rating WHERE rating_id = ?";
         SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlQuery, mpaId);
         if (userRows.next()) {
             return jdbcTemplate.queryForObject(sqlQuery, this::makeRating, mpaId);

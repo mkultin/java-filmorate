@@ -21,7 +21,6 @@ public class LikeDaoImpl implements LikeDao {
     public void addLike(Long filmId, Long userId) {
         String sqlQuery = "INSERT INTO film_like (film_id, user_id) VALUES (?, ?)";
         jdbcTemplate.update(sqlQuery, filmId, userId);
-        //log.info("Добавлен лайк: фильм {}, пользователь id={}", filmId, userId);
     }
 
     @Override

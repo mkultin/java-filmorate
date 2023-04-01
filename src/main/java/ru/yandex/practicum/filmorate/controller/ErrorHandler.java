@@ -24,11 +24,11 @@ public class ErrorHandler {
         return new ErrorResponse(exception.getMessage());
     }
 
-    /*@ExceptionHandler
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Throwable exception) {
         return new ErrorResponse("Произошла непредвиденная ошибка.");
-    }*/
+    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)

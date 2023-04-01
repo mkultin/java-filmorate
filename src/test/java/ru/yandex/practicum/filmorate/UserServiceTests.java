@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class UserValidationTests {
+public class UserServiceTests {
 
     private User firstUser;
     private User secondUser;

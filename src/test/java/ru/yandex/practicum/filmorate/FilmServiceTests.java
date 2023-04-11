@@ -100,7 +100,7 @@ public class FilmServiceTests {
         filmToUpdate.getGenres().add(new Genre(1, "G"));
         filmToUpdate.getGenres().add(new Genre(2, "PG"));
         director = directorDao.create(director);
-        filmToUpdate.getDirector().add(director);
+        filmToUpdate.getDirectors().add(director);
 
         filmService.updateFilm(filmToUpdate);
         Film updatedFilm = filmService.getFilmById(1L);
@@ -108,7 +108,7 @@ public class FilmServiceTests {
         assertThat(updatedFilm).isNotNull();
         assertThat(updatedFilm.getDuration()).isEqualTo(filmToUpdate.getDuration());
         assertThat(updatedFilm.getGenres().size()).isEqualTo(2);
-        assertThat(updatedFilm.getDirector().size()).isEqualTo(1);
+        assertThat(updatedFilm.getDirectors().size()).isEqualTo(1);
     }
 
     @Test
@@ -167,11 +167,11 @@ public class FilmServiceTests {
     @Test
     void shouldGetDirectorFilms() {
         director = directorDao.create(director);
-        firstFilm.getDirector().add(director);
+        firstFilm.getDirectors().add(director);
         firstFilm = filmService.addFilm(firstFilm);
-        secondFilm.getDirector().add(director);
+        secondFilm.getDirectors().add(director);
         secondFilm = filmService.addFilm(secondFilm);
-        thirdFilm.getDirector().add(director);
+        thirdFilm.getDirectors().add(director);
         thirdFilm = filmService.addFilm(thirdFilm);
 
         List<Film> directorFilms = filmService.getDirectorFilms(director.getId(), "likes");

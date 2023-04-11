@@ -151,7 +151,7 @@ public class FilmDbStorage implements FilmStorage {
                 .build();
         film.getLikes().addAll(likeDao.getFilmLikes(film.getId()));
         film.getGenres().addAll(genreDao.getFilmGenres(film.getId()));
-        film.getDirector().addAll(directorDao.getFilmDirector(film.getId()));
+        film.getDirectors().addAll(directorDao.getFilmDirector(film.getId()));
         return film;
     }
 
@@ -172,8 +172,8 @@ public class FilmDbStorage implements FilmStorage {
     private void setFilmDirector(Film film) {
         Long filmId = film.getId();
         directorDao.deleteFilmDirectors(filmId);
-        if (film.getDirector() != null) {
-            for (Director director : film.getDirector()) {
+        if (film.getDirectors() != null) {
+            for (Director director : film.getDirectors()) {
                 director.setName(directorDao.findById(director.getId()).getName());
                 directorDao.setFilmDirector(filmId, director.getId());
             }

@@ -6,12 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.director.DirectorDao;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,6 +26,8 @@ public class FilmServiceTests {
     private Film thirdFilm;
     private final FilmService filmService;
     private final UserService userService;
+    private final DirectorDao directorDao;
+    private Director director;
 
     @BeforeEach
     public void beforeEach() {
@@ -57,6 +57,9 @@ public class FilmServiceTests {
                 .mpa(new Mpa(3, "Мультфильм"))
                 .build();
         thirdFilm.getGenres().add(new Genre(3, "PG-13"));
+
+        director = new Director();
+        director.setName("Director");
     }
 
     @Test
@@ -96,6 +99,8 @@ public class FilmServiceTests {
                 .build();
         filmToUpdate.getGenres().add(new Genre(1, "G"));
         filmToUpdate.getGenres().add(new Genre(2, "PG"));
+        director = directorDao.create(director);
+        filmToUpdate.getDirector().add(director);
 
         filmService.updateFilm(filmToUpdate);
         Film updatedFilm = filmService.getFilmById(1L);
@@ -103,6 +108,7 @@ public class FilmServiceTests {
         assertThat(updatedFilm).isNotNull();
         assertThat(updatedFilm.getDuration()).isEqualTo(filmToUpdate.getDuration());
         assertThat(updatedFilm.getGenres().size()).isEqualTo(2);
+        assertThat(updatedFilm.getDirector().size()).isEqualTo(1);
     }
 
     @Test
@@ -156,5 +162,27 @@ public class FilmServiceTests {
 
         assertThat(popularFilm.size()).isEqualTo(3);
         assertThat(popularFilm.get(0)).isEqualTo(filmService.getFilmById(thirdFilm.getId()));
+    }
+
+    @Test
+    void shouldGetDirectorFilms() {
+        director = directorDao.create(director);
+        firstFilm.getDirector().add(director);
+        firstFilm = filmService.addFilm(firstFilm);
+        secondFilm.getDirector().add(director);
+        secondFilm = filmService.addFilm(secondFilm);
+        thirdFilm.getDirector().add(director);
+        thirdFilm = filmService.addFilm(thirdFilm);
+
+        List<Film> directorFilms = filmService.getDirectorFilms(director.getId(), "likes");
+
+        assertThat(directorFilms).isNotNull();
+        assertThat(directorFilms.size()).isEqualTo(3);
+
+        directorFilms = filmService.getDirectorFilms(director.getId(), "year");
+
+        assertThat(directorFilms).isNotNull();
+        assertThat(directorFilms.size()).isEqualTo(3);
+        assertThat(directorFilms.get(0)).isEqualTo(thirdFilm);
     }
 }

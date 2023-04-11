@@ -9,8 +9,10 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.director.DirectorDao;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDao;
 import ru.yandex.practicum.filmorate.storage.like.LikeDao;
 import ru.yandex.practicum.filmorate.storage.rating.MpaDao;
@@ -33,6 +35,7 @@ public class FilmDbStorage implements FilmStorage {
     private final MpaDao mpaDao;
     private final GenreDao genreDao;
     private final LikeDao likeDao;
+    private final DirectorDao directorDao;
 
     @Override
     public List<Film> getFilms() {
@@ -64,6 +67,7 @@ public class FilmDbStorage implements FilmStorage {
         if (film.getGenres() != null) {
             setFilmGenres(film);
         }
+        setFilmDirector(film);
         log.info("Добавлен новый фильм {}, id={}", film.getName(), filmId);
         return film;
     }
@@ -86,6 +90,7 @@ public class FilmDbStorage implements FilmStorage {
         } else {
             genreDao.deleteFilmGenres(film.getId());
         }
+        setFilmDirector(film);
         log.info("Фильм {}, id={} обновлен!", film.getName(), film.getId());
         return film;
     }
@@ -111,6 +116,30 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(sqlQuery, this::makeFilm, count);
     }
 
+    @Override
+    public List<Film> getDirectorFilms(Integer directorId, String sortBy) {
+        String sqlQuery;
+        if (sortBy.equals("likes")) {
+            sqlQuery = "SELECT * " +
+                    "FROM film AS f " +
+                    "LEFT JOIN (SELECT film_id, COUNT (user_id) AS rate " +
+                    "FROM FILM_LIKE " +
+                    "GROUP BY film_id) AS fl ON f.film_id = fl.film_id " +
+                    "WHERE f.film_id IN (SELECT film_id FROM film_director WHERE director_id = ?) " +
+                    "ORDER BY rate DESC";
+        } else {
+            if (sortBy.equals("year")) {
+                sqlQuery = "SELECT * " +
+                        "FROM film AS f " +
+                        "WHERE f.film_id IN (SELECT film_id FROM film_director WHERE director_id = ?) " +
+                        "ORDER BY EXTRACT(YEAR FROM release_date) DESC";
+            } else {
+                throw new ValidationException("Некорректный параметр сортирровки");
+            }
+        }
+        return jdbcTemplate.query(sqlQuery, this::makeFilm, directorId);
+    }
+
     private Film makeFilm(ResultSet resultSet, int rowNum) throws SQLException {
         Film film = Film.builder()
                 .id(resultSet.getLong("film_id"))
@@ -122,6 +151,7 @@ public class FilmDbStorage implements FilmStorage {
                 .build();
         film.getLikes().addAll(likeDao.getFilmLikes(film.getId()));
         film.getGenres().addAll(genreDao.getFilmGenres(film.getId()));
+        film.getDirector().addAll(directorDao.getFilmDirector(film.getId()));
         return film;
     }
 
@@ -137,5 +167,16 @@ public class FilmDbStorage implements FilmStorage {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         film.getGenres().clear();
         film.getGenres().addAll(genres);
+    }
+
+    private void setFilmDirector(Film film) {
+        Long filmId = film.getId();
+        directorDao.deleteFilmDirectors(filmId);
+        if (film.getDirector() != null) {
+            for (Director director : film.getDirector()) {
+                director.setName(directorDao.findById(director.getId()).getName());
+                directorDao.setFilmDirector(filmId, director.getId());
+            }
+        }
     }
 }

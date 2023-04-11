@@ -75,8 +75,7 @@ public class DirectorDaoImpl implements DirectorDao {
     @Override
     public void deleteDirector(Integer id) {
         String sqlQuery = "DELETE FROM director WHERE director_id = ?";
-        int queryResult = jdbcTemplate.update(sqlQuery, id);
-        validateQueryResult(queryResult);
+        jdbcTemplate.update(sqlQuery, id);
         log.info("Удален режиссер id = {}", id);
     }
 
@@ -98,8 +97,7 @@ public class DirectorDaoImpl implements DirectorDao {
     @Override
     public void deleteFilmDirectors(Long filmId) {
         String sqlQuery = "DELETE FROM film_director WHERE film_id = ?";
-        int queryResult = jdbcTemplate.update(sqlQuery, filmId);
-        validateQueryResult(queryResult);
+        jdbcTemplate.update(sqlQuery, filmId);
     }
 
     private Director makeDirector(ResultSet resultSet, int rowNum) throws SQLException {

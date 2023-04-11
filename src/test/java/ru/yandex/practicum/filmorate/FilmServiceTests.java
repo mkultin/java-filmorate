@@ -183,6 +183,6 @@ public class FilmServiceTests {
 
         assertThat(directorFilms).isNotNull();
         assertThat(directorFilms.size()).isEqualTo(3);
-        assertThat(directorFilms.get(0)).isEqualTo(thirdFilm);
+        assertThat(directorFilms.get(2)).isEqualTo(thirdFilm);
     }
 }

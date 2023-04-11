@@ -68,9 +68,7 @@ public class DirectorDaoImpl implements DirectorDao {
         }
         String sqlQuery = "UPDATE director SET name = ? WHERE director_id = ?";
         int queryResult = jdbcTemplate.update(sqlQuery, director.getName(), director.getId());
-        if (queryResult == 0) {
-            throw new FilmNotFoundException("Режиссер не найден.");
-        }
+        validateQueryResult(queryResult);
         return director;
     }
 
@@ -78,9 +76,7 @@ public class DirectorDaoImpl implements DirectorDao {
     public void deleteDirector(Integer id) {
         String sqlQuery = "DELETE FROM director WHERE director_id = ?";
         int queryResult = jdbcTemplate.update(sqlQuery, id);
-        if (queryResult == 0) {
-            throw new FilmNotFoundException("Режиссер не найден.");
-        }
+        validateQueryResult(queryResult);
         log.info("Удален режиссер id = {}", id);
     }
 
@@ -95,13 +91,15 @@ public class DirectorDaoImpl implements DirectorDao {
     public void setFilmDirector(Long filmId, Integer directorId) {
         String sqlQuery = "INSERT INTO film_director (film_id, director_id) " +
                 "VALUES(?, ?)";
-        jdbcTemplate.update(sqlQuery, filmId, directorId);
+        int queryResult = jdbcTemplate.update(sqlQuery, filmId, directorId);
+        validateQueryResult(queryResult);
     }
 
     @Override
     public void deleteFilmDirectors(Long filmId) {
         String sqlQuery = "DELETE FROM film_director WHERE film_id = ?";
-        jdbcTemplate.update(sqlQuery, filmId);
+        int queryResult = jdbcTemplate.update(sqlQuery, filmId);
+        validateQueryResult(queryResult);
     }
 
     private Director makeDirector(ResultSet resultSet, int rowNum) throws SQLException {
@@ -109,5 +107,11 @@ public class DirectorDaoImpl implements DirectorDao {
                 resultSet.getInt("director_id"),
                 resultSet.getString("name")
         );
+    }
+
+    private void validateQueryResult(int queryResult) {
+        if (queryResult == 0) {
+            throw new FilmNotFoundException("Режиссер не найден.");
+        }
     }
 }

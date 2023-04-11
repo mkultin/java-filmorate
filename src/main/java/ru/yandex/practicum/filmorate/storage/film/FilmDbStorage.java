@@ -132,7 +132,7 @@ public class FilmDbStorage implements FilmStorage {
                 sqlQuery = "SELECT * " +
                         "FROM film AS f " +
                         "WHERE f.film_id IN (SELECT film_id FROM film_director WHERE director_id = ?) " +
-                        "ORDER BY EXTRACT(YEAR FROM release_date) DESC";
+                        "ORDER BY EXTRACT(YEAR FROM release_date)";
             } else {
                 throw new ValidationException("Некорректный параметр сортирровки");
             }

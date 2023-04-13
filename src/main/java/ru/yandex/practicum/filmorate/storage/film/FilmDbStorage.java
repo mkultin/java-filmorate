@@ -7,10 +7,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.director.DirectorDao;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDao;
 import ru.yandex.practicum.filmorate.storage.like.LikeDao;
 import ru.yandex.practicum.filmorate.storage.rating.MpaDao;
@@ -33,6 +34,7 @@ public class FilmDbStorage implements FilmStorage {
     private final MpaDao mpaDao;
     private final GenreDao genreDao;
     private final LikeDao likeDao;
+    private final DirectorDao directorDao;
 
     @Override
     public List<Film> getFilms() {
@@ -46,10 +48,10 @@ public class FilmDbStorage implements FilmStorage {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (filmRows.next()) {
             Film film = jdbcTemplate.queryForObject(sqlQuery, this::makeFilm, id);
-            if (film == null) throw new FilmNotFoundException("Фильм не найден");
+            if (film == null) throw new NotFoundException("Фильм не найден");
             return film;
         } else {
-            throw new FilmNotFoundException("Фильм не найден");
+            throw new NotFoundException("Фильм не найден");
         }
     }
 
@@ -79,7 +81,7 @@ public class FilmDbStorage implements FilmStorage {
                 film.getDescription(), film.getReleaseDate(), film.getDuration(),
                 film.getMpa().getId(), film.getId());
         if (queryResult == 0) {
-            throw new FilmNotFoundException("Фильм не найден");
+            throw new NotFoundException("Фильм не найден");
         }
         if (film.getGenres() != null) {
             setFilmGenres(film);
@@ -111,6 +113,30 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(sqlQuery, this::makeFilm, count);
     }
 
+    @Override
+    public List<Film> getDirectorFilms(Integer directorId, String sortBy) {
+        String sqlQuery;
+        if (sortBy.equals("likes")) {
+            sqlQuery = "SELECT * " +
+                    "FROM film AS f " +
+                    "LEFT JOIN (SELECT film_id, COUNT (user_id) AS rate " +
+                    "FROM FILM_LIKE " +
+                    "GROUP BY film_id) AS fl ON f.film_id = fl.film_id " +
+                    "WHERE f.film_id IN (SELECT film_id FROM film_director WHERE director_id = ?) " +
+                    "ORDER BY rate DESC";
+        } else {
+            if (sortBy.equals("year")) {
+                sqlQuery = "SELECT * " +
+                        "FROM film AS f " +
+                        "WHERE f.film_id IN (SELECT film_id FROM film_director WHERE director_id = ?) " +
+                        "ORDER BY EXTRACT(YEAR FROM release_date)";
+            } else {
+                throw new ValidationException("Некорректный параметр сортирровки");
+            }
+        }
+        return jdbcTemplate.query(sqlQuery, this::makeFilm, directorId);
+    }
+
     private Film makeFilm(ResultSet resultSet, int rowNum) throws SQLException {
         Film film = Film.builder()
                 .id(resultSet.getLong("film_id"))
@@ -122,6 +148,7 @@ public class FilmDbStorage implements FilmStorage {
                 .build();
         film.getLikes().addAll(likeDao.getFilmLikes(film.getId()));
         film.getGenres().addAll(genreDao.getFilmGenres(film.getId()));
+        film.getDirectors().addAll(directorDao.getFilmDirector(film.getId()));
         return film;
     }
 

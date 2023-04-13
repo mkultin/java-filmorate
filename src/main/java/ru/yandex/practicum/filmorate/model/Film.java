@@ -29,6 +29,7 @@ public class Film {
     private final Set<Long> likes = new HashSet<>();
     private Mpa mpa;
     private final Set<Genre> genres = new LinkedHashSet<>();
+    private final Set<Director> directors = new HashSet<>();
 
     public Map<String, Object> toMap() {
         return Map.of(

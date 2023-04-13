@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
@@ -40,7 +40,7 @@ public class MpaDaoImpl implements MpaDao {
         if (userRows.next()) {
             return jdbcTemplate.queryForObject(sqlQuery, this::makeRating, mpaId);
         } else {
-            throw new FilmNotFoundException("MPA не найден");
+            throw new NotFoundException("MPA не найден");
         }
     }
 

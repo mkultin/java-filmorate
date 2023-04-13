@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -42,7 +42,7 @@ public class GenreDaoImpl implements GenreDao {
         if (genreRows.next()) {
             return jdbcTemplate.queryForObject(sqlQuery, this::makeGenre, genreId);
         } else {
-            throw new FilmNotFoundException("Жанр не найден");
+            throw new NotFoundException("Жанр не найден");
         }
     }
 

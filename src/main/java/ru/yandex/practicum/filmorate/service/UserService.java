@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.friend.FriendDao;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -49,7 +49,7 @@ public class UserService {
             friendDao.addFriend(user, friendUser);
             log.info("Для пользователя id={} добавлен друг id={}", id, friendId);
         } else {
-            throw new UserNotFoundException(ERROR_MESSAGE);
+            throw new NotFoundException(ERROR_MESSAGE);
         }
     }
 
@@ -60,7 +60,7 @@ public class UserService {
             friendDao.deleteFriend(user, friendUser);
             log.info("У пользователя id={} удален друг id={}", id, friendId);
         } else {
-            throw new UserNotFoundException(ERROR_MESSAGE);
+            throw new NotFoundException(ERROR_MESSAGE);
         }
     }
 
@@ -72,7 +72,7 @@ public class UserService {
                     .map(userBdStorage::getUserById)
                     .collect(Collectors.toList());
         } else {
-            throw new UserNotFoundException(ERROR_MESSAGE);
+            throw new NotFoundException(ERROR_MESSAGE);
         }
     }
 
@@ -87,7 +87,7 @@ public class UserService {
                     .collect(Collectors.toSet());
             return userBdStorage.getUsersByIds(commonFriends);
         } else {
-            throw new UserNotFoundException(ERROR_MESSAGE);
+            throw new NotFoundException(ERROR_MESSAGE);
         }
     }
 }

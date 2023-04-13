@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.friend.FriendDao;
@@ -42,7 +42,7 @@ public class UserDbStorage implements UserStorage {
             log.info("Найден пользователь id = {}", id);
             return user;
         } else {
-            throw new UserNotFoundException("Пользователь с таким id не найден");
+            throw new NotFoundException("Пользователь с таким id не найден");
         }
     }
 
@@ -83,7 +83,7 @@ public class UserDbStorage implements UserStorage {
         int queryResult = jdbcTemplate.update(sqlQuery, user.getEmail(), user.getLogin(), user.getName(),
                 user.getBirthday(), user.getId());
         if (queryResult == 0) {
-            throw new UserNotFoundException("Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
         log.info("Пользователь id={} обновлен: {}", user.getId(), user.getName());
         return user;

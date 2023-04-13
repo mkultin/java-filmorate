@@ -6,12 +6,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.Film;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,23 +36,17 @@ public class DirectorDaoImpl implements DirectorDao {
 
     @Override
     public Director findById(Integer id) {
-        if (id == null) {
-            throw new ValidationException("Передан пустой id");
-        }
         String sql = "SELECT * FROM director WHERE director_id = ?";
         SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, id);
         if (sqlRowSet.next()) {
             return jdbcTemplate.queryForObject(sql, this::makeDirector, id);
         } else {
-            throw new FilmNotFoundException("Режиссер не найден");
+            throw new NotFoundException("Режиссер не найден");
         }
     }
 
     @Override
     public Director create(Director director) {
-        if (director == null) {
-            throw new ValidationException("Передан пустой director");
-        }
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("director")
                 .usingGeneratedKeyColumns("director_id");
@@ -63,9 +58,6 @@ public class DirectorDaoImpl implements DirectorDao {
 
     @Override
     public Director update(Director director) {
-        if (director == null) {
-            throw new ValidationException("Передан пустой director");
-        }
         String sqlQuery = "UPDATE director SET name = ? WHERE director_id = ?";
         int queryResult = jdbcTemplate.update(sqlQuery, director.getName(), director.getId());
         validateQueryResult(queryResult);
@@ -87,17 +79,26 @@ public class DirectorDaoImpl implements DirectorDao {
     }
 
     @Override
-    public void setFilmDirector(Long filmId, Integer directorId) {
-        String sqlQuery = "INSERT INTO film_director (film_id, director_id) " +
-                "VALUES(?, ?)";
-        int queryResult = jdbcTemplate.update(sqlQuery, filmId, directorId);
-        validateQueryResult(queryResult);
-    }
-
-    @Override
     public void deleteFilmDirectors(Long filmId) {
         String sqlQuery = "DELETE FROM film_director WHERE film_id = ?";
         jdbcTemplate.update(sqlQuery, filmId);
+    }
+
+    @Override
+    public void updateFilmDirector(Film film) {
+        Long filmId = film.getId();
+        deleteFilmDirectors(filmId);
+        if (film.getDirectors() == null) {
+            return;
+        }
+        List<Object[]> batch = new ArrayList<>();
+        for (Director director : film.getDirectors()) {
+            Object[] values = new Object[]{filmId, director.getId()};
+            batch.add(values);
+        }
+        String sqlQuery = "INSERT INTO film_director (film_id, director_id) " +
+                "VALUES(?, ?)";
+        jdbcTemplate.batchUpdate(sqlQuery, batch);
     }
 
     private Director makeDirector(ResultSet resultSet, int rowNum) throws SQLException {
@@ -109,7 +110,7 @@ public class DirectorDaoImpl implements DirectorDao {
 
     private void validateQueryResult(int queryResult) {
         if (queryResult == 0) {
-            throw new FilmNotFoundException("Режиссер не найден.");
+            throw new NotFoundException("Режиссер не найден.");
         }
     }
 }

@@ -7,9 +7,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
-import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDao;
@@ -49,10 +48,10 @@ public class FilmDbStorage implements FilmStorage {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (filmRows.next()) {
             Film film = jdbcTemplate.queryForObject(sqlQuery, this::makeFilm, id);
-            if (film == null) throw new FilmNotFoundException("Фильм не найден");
+            if (film == null) throw new NotFoundException("Фильм не найден");
             return film;
         } else {
-            throw new FilmNotFoundException("Фильм не найден");
+            throw new NotFoundException("Фильм не найден");
         }
     }
 
@@ -67,7 +66,6 @@ public class FilmDbStorage implements FilmStorage {
         if (film.getGenres() != null) {
             setFilmGenres(film);
         }
-        setFilmDirector(film);
         log.info("Добавлен новый фильм {}, id={}", film.getName(), filmId);
         return film;
     }
@@ -83,14 +81,13 @@ public class FilmDbStorage implements FilmStorage {
                 film.getDescription(), film.getReleaseDate(), film.getDuration(),
                 film.getMpa().getId(), film.getId());
         if (queryResult == 0) {
-            throw new FilmNotFoundException("Фильм не найден");
+            throw new NotFoundException("Фильм не найден");
         }
         if (film.getGenres() != null) {
             setFilmGenres(film);
         } else {
             genreDao.deleteFilmGenres(film.getId());
         }
-        setFilmDirector(film);
         log.info("Фильм {}, id={} обновлен!", film.getName(), film.getId());
         return film;
     }
@@ -167,16 +164,5 @@ public class FilmDbStorage implements FilmStorage {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         film.getGenres().clear();
         film.getGenres().addAll(genres);
-    }
-
-    private void setFilmDirector(Film film) {
-        Long filmId = film.getId();
-        directorDao.deleteFilmDirectors(filmId);
-        if (film.getDirectors() != null) {
-            for (Director director : film.getDirectors()) {
-                director.setName(directorDao.findById(director.getId()).getName());
-                directorDao.setFilmDirector(filmId, director.getId());
-            }
-        }
     }
 }

@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.director;
 
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
 import java.util.Set;
@@ -19,7 +20,7 @@ public interface DirectorDao {
 
     Set<Director> getFilmDirector(Long filmId);
 
-    void setFilmDirector(Long filmId, Integer directorId);
-
     void deleteFilmDirectors(Long filmId);
+
+    void updateFilmDirector(Film film);
 }

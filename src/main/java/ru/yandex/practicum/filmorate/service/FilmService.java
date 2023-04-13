@@ -4,9 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
-import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDao;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -34,11 +32,15 @@ public class FilmService {
     }
 
     public Film addFilm(Film film) {
-        return filmStorage.create(film);
+        Film newFilm = filmStorage.create(film);
+        setFilmDirector(newFilm);
+        return newFilm;
     }
 
     public Film updateFilm(Film film) {
-        return filmStorage.updateFilm(film);
+        Film newFilm = filmStorage.updateFilm(film);
+        setFilmDirector(newFilm);
+        return newFilm;
     }
 
     public Film getFilmById(Long id) {
@@ -60,7 +62,7 @@ public class FilmService {
                 likeDao.deleteLike(id, userId);
                 log.info("Удален лайк: фильм {}, пользователь id={}", film.getName(), userId);
             } else {
-                throw new UserNotFoundException("Лайк от указанного пользователя не найден");
+                throw new NotFoundException("Лайк от указанного пользователя не найден");
             }
         }
     }
@@ -70,11 +72,14 @@ public class FilmService {
     }
 
     public List<Film> getDirectorFilms(Integer directorId, String sortBy) {
-        Director director = directorDao.findById(directorId);
-        if (director != null) {
-            return filmStorage.getDirectorFilms(directorId, sortBy);
-        } else {
-            throw new FilmNotFoundException("Режиссер не найден.");
-        }
+        directorDao.findById(directorId);
+        return filmStorage.getDirectorFilms(directorId, sortBy);
+    }
+
+    private void setFilmDirector(Film film) {
+        Long filmId = film.getId();
+        directorDao.updateFilmDirector(film);
+        film.getDirectors().clear();
+        film.getDirectors().addAll(directorDao.getFilmDirector(filmId));
     }
 }

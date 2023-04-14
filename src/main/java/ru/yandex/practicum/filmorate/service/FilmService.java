@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDao;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreDao;
 import ru.yandex.practicum.filmorate.storage.like.LikeDao;
 
 import java.util.List;
@@ -19,12 +20,14 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final LikeDao likeDao;
     private final DirectorDao directorDao;
+    private final GenreDao genreDao;
 
     @Autowired
-    public FilmService(@Qualifier("filmBdStorage") FilmStorage filmStorage, LikeDao likeDao, DirectorDao directorDao) {
+    public FilmService(@Qualifier("filmBdStorage") FilmStorage filmStorage, LikeDao likeDao, DirectorDao directorDao, GenreDao genreDao) {
         this.filmStorage = filmStorage;
         this.likeDao = likeDao;
         this.directorDao = directorDao;
+        this.genreDao = genreDao;
     }
 
     public List<Film> getFilms() {
@@ -67,10 +70,6 @@ public class FilmService {
         }
     }
 
-    public List<Film> getPopularFilms(int count) {
-        return filmStorage.getPopularFilms(count);
-    }
-
     public List<Film> getDirectorFilms(Integer directorId, String sortBy) {
         directorDao.findById(directorId);
         return filmStorage.getDirectorFilms(directorId, sortBy);
@@ -81,5 +80,18 @@ public class FilmService {
         directorDao.updateFilmDirector(film);
         film.getDirectors().clear();
         film.getDirectors().addAll(directorDao.getFilmDirector(filmId));
+    }
+
+    public List<Film> getPopularFilm(int count, Integer genreId, Integer year) {
+        // проверим валидность присланного жанра
+        if (genreId != null) {
+            genreDao.findById(genreId);
+        } else
+            throw new NotFoundException("Попробуйте задать другой жанр для фильтрации популярных фильмов");
+        // проверим валидность присланного года
+        if (year != null && year < 0) {
+            throw new NotFoundException("Год не может быть отрицательным");
+        }
+        return filmStorage.getPopularFilm(count, genreId, year);
     }
 }

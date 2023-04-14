@@ -149,7 +149,7 @@ public class FilmServiceTests {
         filmService.addLike(thirdFilm.getId(), thirdUser.getId());
         filmService.addLike(secondFilm.getId(), secondUser.getId());
 
-        List<Film> popularFilm = filmService.getPopularFilms(10);
+        List<Film> popularFilm = filmService.getPopularFilm(10, 1, 1);
 
         assertThat(popularFilm.size()).isEqualTo(3);
         assertThat(popularFilm.get(0)).isEqualTo(filmService.getFilmById(firstFilm.getId()));
@@ -158,7 +158,7 @@ public class FilmServiceTests {
         filmService.deleteLike(firstFilm.getId(), secondUser.getId());
         filmService.deleteLike(firstFilm.getId(), thirdUser.getId());
 
-        popularFilm = filmService.getPopularFilms(10);
+        popularFilm = filmService.getPopularFilm(10, 1, 1);
 
         assertThat(popularFilm.size()).isEqualTo(3);
         assertThat(popularFilm.get(0)).isEqualTo(filmService.getFilmById(thirdFilm.getId()));

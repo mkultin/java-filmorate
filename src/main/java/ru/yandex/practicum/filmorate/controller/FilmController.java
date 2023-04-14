@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import java.util.List;
 
 @RestController
@@ -45,13 +46,15 @@ public class FilmController {
         filmService.deleteLike(id, userId);
     }
 
-    @GetMapping("/popular")
-    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
-        return filmService.getPopularFilms(count);
-    }
-
     @GetMapping("/director/{directorId}")
     public List<Film> getDirectorFilms(@PathVariable Integer directorId, @RequestParam String sortBy) {
         return filmService.getDirectorFilms(directorId, sortBy);
+    }
+
+    @GetMapping("/popular")
+    public List<Film> getPopularFilm(@Positive @RequestParam(defaultValue = "10") int count,
+                                     @RequestParam(required = false) Integer genreId,
+                                     @RequestParam(required = false) Integer year) {
+        return filmService.getPopularFilm(count, genreId, year);
     }
 }

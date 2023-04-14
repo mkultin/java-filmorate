@@ -20,7 +20,7 @@ public class ReviewDaoImpl implements ReviewDao {
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public ReviewDaoImpl (JdbcTemplate jdbcTemplate) {
+    public ReviewDaoImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

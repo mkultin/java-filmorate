@@ -165,4 +165,19 @@ public class FilmDbStorage implements FilmStorage {
         film.getGenres().clear();
         film.getGenres().addAll(genres);
     }
+
+    @Override
+    public List<Film> getCommonFilms(Long idUser, Long idFriend) {
+        final String searchFilmsSql = "SELECT * " +
+                "FROM FILM f " +
+                "JOIN RATING R on R.RATING_ID = f.RATING_ID " +
+                "JOIN FILM_LIKE l1 on (l1.film_id= f.film_id AND l1.user_id = ?) " +
+                "JOIN FILM_LIKE l2 on (l2.film_id= f.film_id AND l2.user_id = ?) " +
+                "LEFT JOIN " +
+                "(SELECT film_id, COUNT(user_id) as rate " +
+                "FROM FILM_LIKE " +
+                "GROUP BY film_id) fl ON (fl.film_id = f.film_id) " +
+                "ORDER BY fl.rate DESC ";
+        return jdbcTemplate.query(searchFilmsSql, this::makeFilm, idUser, idFriend);
+    }
 }

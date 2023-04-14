@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -17,7 +18,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+@Primary
 @Component
 @Qualifier("userBdStorage")
 @Slf4j

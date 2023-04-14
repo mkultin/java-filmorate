@@ -12,16 +12,13 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDao;
-import ru.yandex.practicum.filmorate.storage.genre.GenreDao;
+import ru.yandex.practicum.filmorate.storage.user.genre.GenreDao;
 import ru.yandex.practicum.filmorate.storage.like.LikeDao;
 import ru.yandex.practicum.filmorate.storage.rating.MpaDao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -164,5 +161,30 @@ public class FilmDbStorage implements FilmStorage {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         film.getGenres().clear();
         film.getGenres().addAll(genres);
+    }
+
+    @Override
+    public List<Film> searchByTitle(String query) {
+        String sql = "select * from films as f where locate(?, lower(name)) > 0";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs, rowNum), query.toLowerCase());
+    }
+
+    @Override
+    public List<Film> searchByDirector(String query) {
+        String sql = "select * from films as f, film_directors as fd, directors as d " +
+                "where f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs, rowNum), query.toLowerCase());
+    }
+
+    @Override
+    public List<Film> searchByTitleAndDirector(String query) {
+        String sql = "select * from films as f, film_directors as fd, directors as d " +
+                "where (locate(?, lower(f.name)) > 0 or (f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0))";
+        List<Film> ans = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs, rowNum), query.toLowerCase(), query.toLowerCase());
+        HashSet<Film> uniqueList = new HashSet<>(ans);
+        ans = new ArrayList<>();
+        ans.addAll(uniqueList);
+        Collections.reverse(ans);
+        return ans;
     }
 }

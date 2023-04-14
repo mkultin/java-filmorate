@@ -100,14 +100,14 @@ public class UserDbStorage implements UserStorage {
     }
 
     private User makeUser(ResultSet resultSet, int rowNum) throws SQLException {
-        User user =  User.builder()
+        User user = User.builder()
                 .id(resultSet.getLong("user_id"))
                 .email(resultSet.getString("email"))
                 .login(resultSet.getString("login"))
                 .name(resultSet.getString("name"))
                 .birthday(resultSet.getDate("birthday").toLocalDate())
                 .build();
-            user.getFriends().addAll(friendDao.getFriends(user.getId()));
+        user.getFriends().addAll(friendDao.getFriends(user.getId()));
         return user;
     }
 

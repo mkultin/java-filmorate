@@ -69,20 +69,14 @@ public class ReviewsTests {
         review1 = new Review();
         review1.setContent("the bad film");
         review1.setIsPositive(false);
-        review1.setFilmId(1L);
-        review1.setUserId(1L);
 
         review2 = new Review();
         review2.setContent("good film");
         review2.setIsPositive(true);
-        review2.setFilmId(2L);
-        review2.setUserId(1L);
 
         review3 = new Review();
         review3.setContent("good film");
         review3.setIsPositive(true);
-        review3.setFilmId(1L);
-        review3.setUserId(2L);
     }
 
     @Test
@@ -92,6 +86,8 @@ public class ReviewsTests {
         user2 = userService.addUser(user2);
         film2 = filmService.addFilm(film2);
 
+        review1.setFilmId(film1.getId());
+        review1.setUserId(user1.getId());
         Review createdReview = reviewService.create(review1);
 
         assertThat(createdReview.getReviewId()).isEqualTo(1);
@@ -110,12 +106,16 @@ public class ReviewsTests {
 
         assertThat(updatedReview.getReviewId()).isEqualTo(1);
         assertThat(updatedReview.getContent()).isEqualTo(review.getContent());
-        assertThat(updatedReview.getUserId()).isEqualTo(1);
-        assertThat(updatedReview.getFilmId()).isEqualTo(1);
+        assertThat(updatedReview.getUserId()).isEqualTo(user1.getId());
+        assertThat(updatedReview.getFilmId()).isEqualTo(film1.getId());
 
         review1 = updatedReview;
 
+        review2.setFilmId(film2.getId());
+        review2.setUserId(user1.getId());
         review2 = reviewService.create(review2);
+        review3.setFilmId(film1.getId());
+        review3.setUserId(user2.getId());
         review3 = reviewService.create(review3);
 
         List<Review> reviewList = reviewService.getReviews(4);

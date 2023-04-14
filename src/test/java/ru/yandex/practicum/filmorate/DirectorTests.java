@@ -33,21 +33,25 @@ public class DirectorTests {
 
     @Test
     void shouldCRUDDirector() {
-        directorDao.create(firstDirector);
+        directorDao.findAll().stream()
+                .map(Director::getId)
+                .forEach(directorDao::deleteDirector);
 
-        Director director = directorDao.findById(1);
+        Director createdDirector = directorDao.create(firstDirector);
+
+        Director director = directorDao.findById(createdDirector.getId());
         assertThat(director).isNotNull();
-        assertThat(director.getId()).isEqualTo(1);
+        assertThat(director.getId()).isEqualTo(createdDirector.getId());
         assertThat(director.getName()).isEqualTo(firstDirector.getName());
 
-        directorDao.create(secondDirector);
+        createdDirector = directorDao.create(secondDirector);
 
         List<Director> directors = directorDao.findAll();
         assertThat(directors).isNotNull();
         assertThat(directors.size()).isEqualTo(2);
         assertThat(directors).contains(director);
 
-        Director newDirector = new Director(2, "The Second Director");
+        Director newDirector = new Director(createdDirector.getId(), "The Second Director");
         directorDao.update(newDirector);
 
         director = directorDao.findById(newDirector.getId());

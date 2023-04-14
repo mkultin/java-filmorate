@@ -9,16 +9,17 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.friend.FriendDao;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class UserService {
 
+    private static final String ERROR_MESSAGE = "Передан несущетвующий id";
     private final UserStorage userBdStorage;
     private final FriendDao friendDao;
-    private static final String ERROR_MESSAGE = "Передан несущетвующий id";
 
     @Autowired
     public UserService(@Qualifier("userBdStorage") UserStorage userBdStorage, FriendDao friendDao) {

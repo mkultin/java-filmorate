@@ -29,7 +29,7 @@ public class FilmService {
 
     @Autowired
     public FilmService(@Qualifier("filmBdStorage") FilmStorage filmStorage, UserStorage userStorage, LikeDao likeDao,
-                       DirectorDao directorDao,GenreDao genreDao, EventDao eventDao) {
+                       DirectorDao directorDao, GenreDao genreDao, EventDao eventDao) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.likeDao = likeDao;

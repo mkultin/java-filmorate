@@ -42,7 +42,7 @@ public class LikeDaoImpl implements LikeDao {
 
     @Override
     public Set<Film> getRecommendedFilms(Long userId) {
-        String sqlQuery = "SELECT * "+
+        String sqlQuery = "SELECT * " +
                 "FROM film " +
                 "WHERE film_id IN (" +
                 "SELECT film_id " +
@@ -53,7 +53,7 @@ public class LikeDaoImpl implements LikeDao {
                     "WHERE film_id IN (SELECT film_id FROM film_like WHERE user_id = ?) AND user_id <> ? " +
                     "GROUP BY user_id " +
                     "ORDER BY COUNT(film_id) DESC " +
-                    "LIMIT 1) "+
+                    "LIMIT 1) " +
                 "AND film_id NOT IN (SELECT film_id FROM film_like WHERE user_id = ?))";
         return new HashSet<>(jdbcTemplate.query(sqlQuery, this::makeFilm, userId, userId, userId));
     }

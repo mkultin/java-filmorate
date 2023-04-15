@@ -87,7 +87,17 @@ public class FilmServiceTests {
 
         filmService.addFilm(secondFilm);
         films = filmService.getFilms();
-        assertThat(films).contains(secondFilm);
+        assertThat(films).contains(firstFilm);
+    }
+
+    @Test
+    public void shouldDeleteFilm() {
+        Film film = filmService.addFilm(firstFilm);
+        List<Film> films = filmService.getFilms();
+        assertThat(films).contains(firstFilm);
+        filmService.delete(film.getId());
+        films = filmService.getFilms();
+        assertThat(films).doesNotContain(film);
     }
 
     @Test

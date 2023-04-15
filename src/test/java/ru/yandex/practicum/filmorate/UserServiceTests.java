@@ -77,6 +77,16 @@ public class UserServiceTests {
     }
 
     @Test
+    public void shouldDeleteUser() {
+        User user = userService.addUser(firstUser);
+        List<User> users = userService.getUsers();
+        assertThat(users).contains(firstUser);
+        userService.delete(user.getId());
+        users = userService.getUsers();
+        assertThat(users).doesNotContain(user);
+    }
+
+    @Test
     public void shouldUpdateUser() {
         userService.addUser(firstUser);
         User userToUpd = User.builder()

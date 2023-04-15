@@ -109,21 +109,21 @@ public class FilmDbStorage implements FilmStorage {
                         "FROM FILM f " +
                         "JOIN RATING r ON (r.rating_id = f.rating_id) " +
                         "LEFT JOIN " +
-                        "(SELECT film_id, COUNT(user_id) as rate " +
-                        "FROM FILM_LIKE " +
-                        "GROUP BY film_id) fl ON (fl.film_id = f.film_id) ");
+                                    "(SELECT film_id, COUNT(user_id) as rate " +
+                                    "FROM FILM_LIKE " +
+                                    "GROUP BY film_id) fl ON (fl.film_id = f.film_id) ");
         if (genreId != null) {
             getPopularFilmsSql.append(
-                    "JOIN FILM_GENRE g ON (g.film_id = f.film_id AND g.genre_id = ").append(genreId).append(") ");
+                    "JOIN FILM_GENRE g ON g.film_id = f.film_id AND g.genre_id = ?");
         }
         if (year != null) {
             getPopularFilmsSql.append(
-                    "WHERE EXTRACT(YEAR from CAST(f.release_date AS DATE)) = ").append(year).append(" ");
+                    "WHERE EXTRACT(YEAR from CAST(f.release_date AS DATE)) = ?");
         }
         getPopularFilmsSql.append(
                 "ORDER BY fl.rate DESC " +
                         "LIMIT ?");
-        return jdbcTemplate.query(getPopularFilmsSql.toString(), this::makeFilm, count);
+        return jdbcTemplate.query(getPopularFilmsSql.toString(), this::makeFilm, genreId, year, count);
     }
 
     @Override

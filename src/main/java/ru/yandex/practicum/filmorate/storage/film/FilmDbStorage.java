@@ -165,21 +165,21 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> searchByTitle(String query) {
-        String sql = "select * from films as f where locate(?, lower(name)) > 0";
+        String sql = "select * from film as f where locate(?, lower(name)) > 0";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs, rowNum), query.toLowerCase());
     }
 
     @Override
     public List<Film> searchByDirector(String query) {
-        String sql = "select * from films as f, film_directors as fd, directors as d " +
-                "where f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0";
+        String sql = "select * from film as f, film_director as fd, director as d " +
+                "where f.film_id = fd.film_id and fd.director_id = d.director_id and locate(?, lower(d.name)) > 0";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs, rowNum), query.toLowerCase());
     }
 
     @Override
     public List<Film> searchByTitleAndDirector(String query) {
-        String sql = "select * from films as f, film_directors as fd, directors as d " +
-                "where (locate(?, lower(f.name)) > 0 or (f.id = fd.film_id and fd.director_id = d.id and locate(?, lower(d.name)) > 0))";
+        String sql = "select * from film as f, film_director as fd, director as d " +
+                "where (locate(?, lower(f.name)) > 0 or (f.film_id = fd.film_id and fd.director_id = d.director_id and locate(?, lower(d.name)) > 0))";
         List<Film> ans = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs, rowNum), query.toLowerCase(), query.toLowerCase());
         HashSet<Film> uniqueList = new HashSet<>(ans);
         ans = new ArrayList<>();

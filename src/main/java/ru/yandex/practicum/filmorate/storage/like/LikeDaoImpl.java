@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.like;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -12,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.rating.MpaDao;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Component

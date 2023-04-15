@@ -1,5 +1,8 @@
 package ru.yandex.practicum.filmorate.storage.like;
 
+import ru.yandex.practicum.filmorate.model.Film;
+
+import java.util.List;
 import java.util.Set;
 
 public interface LikeDao {
@@ -9,4 +12,6 @@ public interface LikeDao {
     void deleteLike(Long filmId, Long userId);
 
     Set<Long> getFilmLikes(Long filmId);
+
+    Set<Film> getRecommendedFilms(Long userId);
 }

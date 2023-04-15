@@ -47,6 +47,10 @@ public class UserService {
         return userBdStorage.getUserById(id);
     }
 
+    public void delete(Long id) {
+        userBdStorage.delete(id);
+    }
+
     public void addFriend(Long id, Long friendId) {
         User user = userBdStorage.getUserById(id);
         User friendUser = userBdStorage.getUserById(friendId);

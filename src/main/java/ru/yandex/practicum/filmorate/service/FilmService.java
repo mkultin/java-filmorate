@@ -50,6 +50,10 @@ public class FilmService {
         return filmStorage.getFilmById(id);
     }
 
+    public void delete(Long id) {
+        filmStorage.delete(id);
+    }
+
     public void addLike(Long id, Long userId) {
         Film film = filmStorage.getFilmById(id);
         if (film != null) {

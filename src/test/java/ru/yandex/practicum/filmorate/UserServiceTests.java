@@ -123,7 +123,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void shouldGetRecommendedFilms(){
+    public void shouldGetRecommendedFilms() {
         userService.addUser(firstUser);
         userService.addUser(secondUser);
 

@@ -97,7 +97,7 @@ public class UserService {
     }
 
     public Set<Film> getRecommendedFilms(Long userId) {
-        User user = userBdStorage.getUserById(userId); //проверка существования пользователя
+        User user = userBdStorage.getUserById(userId); //проверка существования пользователя, если его нет выкинет ошибку
         return likeDao.getRecommendedFilms(userId);
     }
 }

@@ -136,6 +136,12 @@ public class ReviewsTests {
         assertThat(reviewList.get(0)).isEqualTo(review3);
         assertThat(reviewList.size()).isEqualTo(2);
 
+        //*
+        reviewService.addDislike(review2.getReviewId(), user1.getId());
+        review2 = reviewService.findById(review2.getReviewId());
+
+        assertThat(review2.getUseful()).isEqualTo(-1);
+
         reviewService.delete(review1.getReviewId());
 
         reviewList = reviewService.getReviews(3);

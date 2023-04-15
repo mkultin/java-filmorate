@@ -80,7 +80,7 @@ public class ReviewDaoImpl implements ReviewDao {
 
     @Override
     public void addLike(Long reviewId, Long userId) {
-        String sqlQuery = "INSERT INTO like_review (review_id, user_id, is_like)" +
+        String sqlQuery = "MERGE INTO like_review (review_id, user_id, is_like) " +
                 "VALUES (?, ?, TRUE)";
         jdbcTemplate.update(sqlQuery, reviewId, userId);
         log.info("Отзыву id = {} добавлен лайк от пользователя id = {}.", reviewId, userId);
@@ -88,7 +88,7 @@ public class ReviewDaoImpl implements ReviewDao {
 
     @Override
     public void addDislike(Long reviewId, Long userId) {
-        String sqlQuery = "INSERT INTO like_review (review_id, user_id, is_like)" +
+        String sqlQuery = "MERGE INTO like_review (review_id, user_id, is_like) " +
                 "VALUES (?, ?, FALSE)";
         jdbcTemplate.update(sqlQuery, reviewId, userId);
         log.info("Отзыву id = {} добавлен дизлайк от пользователя id = {}.", reviewId, userId);

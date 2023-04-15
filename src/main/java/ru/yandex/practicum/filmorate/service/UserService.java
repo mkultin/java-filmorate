@@ -5,8 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.friend.FriendDao;
+import ru.yandex.practicum.filmorate.storage.like.LikeDao;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
@@ -18,12 +20,14 @@ public class UserService {
 
     private final UserStorage userBdStorage;
     private final FriendDao friendDao;
+    private final LikeDao likeDao;
     private static final String ERROR_MESSAGE = "Передан несущетвующий id";
 
     @Autowired
-    public UserService(@Qualifier("userBdStorage") UserStorage userBdStorage, FriendDao friendDao) {
+    public UserService(@Qualifier("userBdStorage") UserStorage userBdStorage, FriendDao friendDao, LikeDao likeDao) {
         this.userBdStorage = userBdStorage;
         this.friendDao = friendDao;
+        this.likeDao = likeDao;
     }
 
     public List<User> getUsers() {
@@ -89,5 +93,10 @@ public class UserService {
         } else {
             throw new NotFoundException(ERROR_MESSAGE);
         }
+    }
+
+    public Set<Film> getRecommendedFilms(Long userId) {
+        User user = userBdStorage.getUserById(userId); //проверка существования пользователя
+        return likeDao.getRecommendedFilms(userId);
     }
 }

@@ -84,20 +84,16 @@ public class UserDbStorage implements UserStorage {
                 "WHERE user_id = ?";
         int queryResult = jdbcTemplate.update(sqlQuery, user.getEmail(), user.getLogin(), user.getName(),
                 user.getBirthday(), user.getId());
-        if (queryResult == 0) {
-            throw new NotFoundException("Пользователь не найден");
-        }
+        validateQueryResult(queryResult);
         log.info("Пользователь id={} обновлен: {}", user.getId(), user.getName());
         return user;
     }
 
     @Override
     public void delete(Long id) {
-        if (id == null || id == 0) {
-            throw new ValidationException("Передан пустой id");
-        }
         String sqlQuery = "DELETE FROM users WHERE user_id = ?";
-        jdbcTemplate.update(sqlQuery, id);
+        int queryResult = jdbcTemplate.update(sqlQuery, id);
+        validateQueryResult(queryResult);
         log.info("Пользователь id = {} удален", id);
     }
 
@@ -116,6 +112,12 @@ public class UserDbStorage implements UserStorage {
     private void validateName(User user) {
         if (user.getName() == null || user.getName().equals("")) {
             user.setName(user.getLogin());
+        }
+    }
+
+    private void validateQueryResult(int queryResult) {
+        if (queryResult == 0) {
+            throw new NotFoundException("Пользователь не найден");
         }
     }
 }

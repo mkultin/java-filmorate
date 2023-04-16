@@ -80,9 +80,7 @@ public class FilmDbStorage implements FilmStorage {
         int queryResult = jdbcTemplate.update(sqlQuery, film.getName(),
                 film.getDescription(), film.getReleaseDate(), film.getDuration(),
                 film.getMpa().getId(), film.getId());
-        if (queryResult == 0) {
-            throw new NotFoundException("Фильм не найден");
-        }
+        validateQueryResult(queryResult);
         if (film.getGenres() != null) {
             setFilmGenres(film);
         } else {
@@ -94,11 +92,10 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void delete(Long id) {
-        if (id == null) {
-            throw new ValidationException("Передан пустой id");
-        }
         String sqlQueryDelete = "DELETE FROM film WHERE film_id = ?";
-        jdbcTemplate.update(sqlQueryDelete, id);
+        int queryResult = jdbcTemplate.update(sqlQueryDelete, id);
+        validateQueryResult(queryResult);
+        log.info("Фильм id = {} удален", id);
     }
 
     @Override
@@ -164,6 +161,12 @@ public class FilmDbStorage implements FilmStorage {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         film.getGenres().clear();
         film.getGenres().addAll(genres);
+    }
+
+    private void validateQueryResult(int queryResult) {
+        if (queryResult == 0) {
+            throw new NotFoundException("Фильм не найден");
+        }
     }
 
     @Override

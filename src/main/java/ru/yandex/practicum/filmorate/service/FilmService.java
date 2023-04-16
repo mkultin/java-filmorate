@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.director.DirectorDao;
 import ru.yandex.practicum.filmorate.storage.feed.EventDao;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeDao;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
 
@@ -19,14 +20,16 @@ import java.util.List;
 public class FilmService {
 
     private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
     private final LikeDao likeDao;
     private final DirectorDao directorDao;
     private final EventDao eventDao;
 
     @Autowired
-    public FilmService(@Qualifier("filmBdStorage") FilmStorage filmStorage, LikeDao likeDao,
+    public FilmService(@Qualifier("filmBdStorage") FilmStorage filmStorage, UserStorage userStorage, LikeDao likeDao,
                        DirectorDao directorDao, EventDao eventDao) {
         this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
         this.likeDao = likeDao;
         this.directorDao = directorDao;
         this.eventDao = eventDao;
@@ -86,5 +89,11 @@ public class FilmService {
         directorDao.updateFilmDirector(film);
         film.getDirectors().clear();
         film.getDirectors().addAll(directorDao.getFilmDirector(filmId));
+    }
+
+    public List<Film> getCommonFilms(Long idUser, Long idFriend) {
+        userStorage.getUserById(idUser);
+        userStorage.getUserById(idFriend);
+        return filmStorage.getCommonFilms(idUser, idFriend);
     }
 }

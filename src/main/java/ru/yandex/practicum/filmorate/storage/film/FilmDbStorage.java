@@ -12,7 +12,7 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDao;
-import ru.yandex.practicum.filmorate.storage.user.genre.GenreDao;
+import ru.yandex.practicum.filmorate.storage.genre.GenreDao;
 import ru.yandex.practicum.filmorate.storage.like.LikeDao;
 import ru.yandex.practicum.filmorate.storage.rating.MpaDao;
 
@@ -165,7 +165,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> searchByTitle(String query) {
-        String sql = "select * from film as f where locate(?, lower(name)) > 0";
+        String sql = "SELECT * FROM FILM WHERE LOCATE(?, LOWER(NAME)) > 0";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs, rowNum), query.toLowerCase());
     }
 
@@ -180,7 +180,7 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> searchByTitleAndDirector(String query) {
         String sql = "select * from film as f, film_director as fd, director as d " +
                 "where (locate(?, lower(f.name)) > 0 or (f.film_id = fd.film_id and fd.director_id = d.director_id and locate(?, lower(d.name)) > 0))";
-        List<Film> ans = jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs, rowNum), query.toLowerCase(), query.toLowerCase());
+        List<Film> ans = jdbcTemplate.query(sql, this::makeFilm, query.toLowerCase(), query.toLowerCase());
         HashSet<Film> uniqueList = new HashSet<>(ans);
         ans = new ArrayList<>();
         ans.addAll(uniqueList);

@@ -22,6 +22,7 @@ public class FilmService {
     private final LikeDao likeDao;
     private final DirectorDao directorDao;
 
+
     @Autowired
     public FilmService(@Qualifier("filmBdStorage") FilmStorage filmStorage, UserStorage userStorage, LikeDao likeDao, DirectorDao directorDao) {
         this.filmStorage = filmStorage;
@@ -74,8 +75,8 @@ public class FilmService {
         }
     }
 
-    public List<Film> getPopularFilms(int count) {
-        return filmStorage.getPopularFilms(count);
+    public List<Film> getPopularFilm(int count, Integer genreId, Integer year) {
+        return filmStorage.getPopularFilm(count, genreId, year);
     }
 
     public List<Film> getDirectorFilms(Integer directorId, String sortBy) {

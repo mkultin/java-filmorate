@@ -1,14 +1,19 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
+import java.time.Instant;
 
 @Data
 @Builder
+@AllArgsConstructor
 public class Event {
-    private LocalDateTime timestamp;
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER_INT)
+    private Timestamp timestamp;
     private long userId;
     private String eventType;
     private String operation;
@@ -20,6 +25,6 @@ public class Event {
         this.entityId = entityId;
         this.eventType = eventType;
         this.operation = operation;
-        timestamp = LocalDateTime.now();
+        timestamp = Timestamp.from(Instant.now());
     }
 }

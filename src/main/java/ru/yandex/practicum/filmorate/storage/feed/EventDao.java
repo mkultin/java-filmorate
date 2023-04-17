@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface EventDao {
     List<Event> getFeed(long userId);
+
     void addEvent(Event event);
 }

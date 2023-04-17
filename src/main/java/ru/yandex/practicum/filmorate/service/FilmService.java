@@ -68,7 +68,7 @@ public class FilmService {
 
         if (film.getLikes().contains(userId)) {
             likeDao.deleteLike(id, userId);
-            eventDao.addEvent(new Event(userId, id, "LIKE", "DELETE"));
+            eventDao.addEvent(new Event(userId, id, "LIKE", "REMOVE"));
             log.info("Удален лайк: фильм {}, пользователь id={}", film.getName(), userId);
         } else {
             throw new NotFoundException("Лайк от указанного пользователя не найден");

@@ -25,10 +25,7 @@ public class EventDaoImpl implements EventDao {
                 "FROM event e " +
                 "JOIN event_type et ON e.type_id = et.type_id " +
                 "JOIN operation o ON e.operation_id = o.operation_id " +
-                "WHERE user_id IN (" +
-                "SELECT friend_id " +
-                "FROM user_friend " +
-                "WHERE user_id = ?)" +
+                "WHERE user_id = ?" +
                 "ORDER BY e.event_timestamp";
 
         return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeEvent(rs), userId);
@@ -50,7 +47,7 @@ public class EventDaoImpl implements EventDao {
 
     private Event makeEvent(ResultSet rs) throws SQLException {
         return Event.builder()
-                .timestamp(rs.getTimestamp("event_timestamp").toLocalDateTime())
+                .timestamp(rs.getTimestamp("event_timestamp"))
                 .userId(rs.getLong("user_id"))
                 .eventType(rs.getString("event_type"))
                 .operation(rs.getString("operation"))

@@ -3,7 +3,9 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.storage.feed.EventDao;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.review.ReviewDao;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -14,28 +16,39 @@ import java.util.List;
 public class ReviewService {
 
     private final ReviewDao reviewDao;
+    private final EventDao eventDao;
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
-    public ReviewService(ReviewDao reviewDao,
+    public ReviewService(ReviewDao reviewDao, EventDao eventDao,
                          @Qualifier("filmBdStorage") FilmStorage filmStorage,
                          @Qualifier("userBdStorage") UserStorage userStorage) {
         this.reviewDao = reviewDao;
+        this.eventDao = eventDao;
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
 
     public Review create(Review review) {
         validateReview(review);
-        return reviewDao.create(review);
+        Review reviewCreated = reviewDao.create(review);
+        eventDao.addEvent(new Event(reviewCreated.getUserId(),
+                reviewCreated.getReviewId(), "REVIEW", "ADD"));
+        return reviewCreated;
     }
 
     public Review update(Review review) {
-        validateReview(review);
+        Review reviewToUpdate = findById(review.getReviewId());
+        eventDao.addEvent(new Event(reviewToUpdate.getUserId(),
+                reviewToUpdate.getReviewId(), "REVIEW", "UPDATE"));
+        // в ивенты добавляются данные (а именно userId) из отзыва до обновления – так хочет постман
         return reviewDao.update(review);
     }
 
     public void delete(Long reviewId) {
+        Review review = findById(reviewId);
+        eventDao.addEvent(new Event(review.getUserId(),
+                review.getReviewId(), "REVIEW", "REMOVE"));
         reviewDao.delete(reviewId);
     }
 

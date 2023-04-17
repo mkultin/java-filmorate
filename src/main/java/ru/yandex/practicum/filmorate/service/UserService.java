@@ -5,8 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.feed.EventDao;
 import ru.yandex.practicum.filmorate.storage.friend.FriendDao;
 import ru.yandex.practicum.filmorate.storage.like.LikeDao;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -22,13 +24,16 @@ public class UserService {
     private final UserStorage userBdStorage;
     private final FriendDao friendDao;
     private final LikeDao likeDao;
+    private final EventDao eventDao;
     private static final String ERROR_MESSAGE = "Передан несущетвующий id";
 
     @Autowired
-    public UserService(@Qualifier("userBdStorage") UserStorage userBdStorage, FriendDao friendDao, LikeDao likeDao) {
+    public UserService(@Qualifier("userBdStorage") UserStorage userBdStorage, FriendDao friendDao,
+                       LikeDao likeDao, EventDao eventDao) {
         this.userBdStorage = userBdStorage;
         this.friendDao = friendDao;
         this.likeDao = likeDao;
+        this.eventDao = eventDao;
     }
 
     public List<User> getUsers() {
@@ -54,23 +59,19 @@ public class UserService {
     public void addFriend(Long id, Long friendId) {
         User user = userBdStorage.getUserById(id);
         User friendUser = userBdStorage.getUserById(friendId);
-        if (user != null && friendUser != null) {
-            friendDao.addFriend(user, friendUser);
-            log.info("Для пользователя id={} добавлен друг id={}", id, friendId);
-        } else {
-            throw new NotFoundException(ERROR_MESSAGE);
-        }
+
+        friendDao.addFriend(user, friendUser);
+        eventDao.addEvent(new Event(id, friendId, "FRIEND", "ADD"));
+        log.info("Для пользователя id={} добавлен друг id={}", id, friendId);
     }
 
     public void deleteFriend(Long id, Long friendId) {
         User user = userBdStorage.getUserById(id);
         User friendUser = userBdStorage.getUserById(friendId);
-        if (user != null && friendUser != null) {
-            friendDao.deleteFriend(user, friendUser);
-            log.info("У пользователя id={} удален друг id={}", id, friendId);
-        } else {
-            throw new NotFoundException(ERROR_MESSAGE);
-        }
+
+        friendDao.deleteFriend(user, friendUser);
+        eventDao.addEvent(new Event(id, friendId, "FRIEND", "REMOVE"));
+        log.info("У пользователя id={} удален друг id={}", id, friendId);
     }
 
     public List<User> getFriends(Long id) {
@@ -103,5 +104,10 @@ public class UserService {
     public Set<Film> getRecommendedFilms(Long userId) {
         User user = userBdStorage.getUserById(userId); //проверка существования пользователя, если его нет выкинет ошибку
         return likeDao.getRecommendedFilms(userId);
+    }
+
+    public List<Event> getFeed(long userId) {
+        userBdStorage.getUserById(userId);
+        return eventDao.getFeed(userId);
     }
 }

@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Primary
 @Component
 @Qualifier("userBdStorage")
 @Slf4j
@@ -82,38 +84,40 @@ public class UserDbStorage implements UserStorage {
                 "WHERE user_id = ?";
         int queryResult = jdbcTemplate.update(sqlQuery, user.getEmail(), user.getLogin(), user.getName(),
                 user.getBirthday(), user.getId());
-        if (queryResult == 0) {
-            throw new NotFoundException("Пользователь не найден");
-        }
+        validateQueryResult(queryResult);
         log.info("Пользователь id={} обновлен: {}", user.getId(), user.getName());
         return user;
     }
 
     @Override
     public void delete(Long id) {
-        if (id == null || id == 0) {
-            throw new ValidationException("Передан пустой id");
-        }
         String sqlQuery = "DELETE FROM users WHERE user_id = ?";
-        jdbcTemplate.update(sqlQuery, id);
+        int queryResult = jdbcTemplate.update(sqlQuery, id);
+        validateQueryResult(queryResult);
         log.info("Пользователь id = {} удален", id);
     }
 
     private User makeUser(ResultSet resultSet, int rowNum) throws SQLException {
-        User user =  User.builder()
+        User user = User.builder()
                 .id(resultSet.getLong("user_id"))
                 .email(resultSet.getString("email"))
                 .login(resultSet.getString("login"))
                 .name(resultSet.getString("name"))
                 .birthday(resultSet.getDate("birthday").toLocalDate())
                 .build();
-            user.getFriends().addAll(friendDao.getFriends(user.getId()));
+        user.getFriends().addAll(friendDao.getFriends(user.getId()));
         return user;
     }
 
     private void validateName(User user) {
         if (user.getName() == null || user.getName().equals("")) {
             user.setName(user.getLogin());
+        }
+    }
+
+    private void validateQueryResult(int queryResult) {
+        if (queryResult == 0) {
+            throw new NotFoundException("Пользователь не найден");
         }
     }
 }

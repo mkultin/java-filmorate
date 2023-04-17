@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -21,6 +22,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Primary
 @Component
 @Qualifier("filmBdStorage")
 @Slf4j
@@ -77,9 +79,7 @@ public class FilmDbStorage implements FilmStorage {
         int queryResult = jdbcTemplate.update(sqlQuery, film.getName(),
                 film.getDescription(), film.getReleaseDate(), film.getDuration(),
                 film.getMpa().getId(), film.getId());
-        if (queryResult == 0) {
-            throw new NotFoundException("Фильм не найден");
-        }
+        validateQueryResult(queryResult);
         if (film.getGenres() != null) {
             setFilmGenres(film);
         } else {
@@ -91,23 +91,35 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void delete(Long id) {
-        if (id == null) {
-            throw new ValidationException("Передан пустой id");
-        }
         String sqlQueryDelete = "DELETE FROM film WHERE film_id = ?";
-        jdbcTemplate.update(sqlQueryDelete, id);
+        int queryResult = jdbcTemplate.update(sqlQueryDelete, id);
+        validateQueryResult(queryResult);
+        log.info("Фильм id = {} удален", id);
     }
 
     @Override
-    public List<Film> getPopularFilms(int count) {
-        String sqlQuery = "SELECT * " +
-                "FROM film AS f " +
-                "LEFT JOIN (SELECT film_id, COUNT (user_id) AS rate " +
-                "FROM FILM_LIKE " +
-                "GROUP BY film_id) AS fl ON f.film_id = fl.film_id " +
-                "ORDER BY rate DESC " +
-                "LIMIT ?";
-        return jdbcTemplate.query(sqlQuery, this::makeFilm, count);
+    public List<Film> getPopularFilm(int count, Integer genreId, Integer year) {
+        StringBuilder getPopularFilmsSql = new StringBuilder();
+        getPopularFilmsSql.append(
+                "SELECT * " +
+                        "FROM FILM f " +
+                        "JOIN RATING r ON (r.rating_id = f.rating_id) " +
+                        "LEFT JOIN " +
+                        "(SELECT film_id, COUNT(user_id) as rate " +
+                        "FROM FILM_LIKE " +
+                        "GROUP BY film_id) fl ON (fl.film_id = f.film_id) ");
+        if (genreId != null) {
+            getPopularFilmsSql.append(
+                    "JOIN FILM_GENRE g ON (g.film_id = f.film_id AND g.genre_id = ").append(genreId).append(") ");
+        }
+        if (year != null) {
+            getPopularFilmsSql.append(
+                    "WHERE EXTRACT(YEAR from CAST(f.release_date AS DATE)) = ").append(year).append(" ");
+        }
+        getPopularFilmsSql.append(
+                "ORDER BY fl.rate DESC " +
+                        "LIMIT ?");
+        return jdbcTemplate.query(getPopularFilmsSql.toString(), this::makeFilm, count);
     }
 
     @Override
@@ -161,6 +173,27 @@ public class FilmDbStorage implements FilmStorage {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         film.getGenres().clear();
         film.getGenres().addAll(genres);
+    }
+
+    private void validateQueryResult(int queryResult) {
+        if (queryResult == 0) {
+            throw new NotFoundException("Фильм не найден");
+        }
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Long idUser, Long idFriend) {
+        final String searchFilmsSql = "SELECT * " +
+                "FROM FILM f " +
+                "JOIN RATING R on R.RATING_ID = f.RATING_ID " +
+                "JOIN FILM_LIKE l1 on (l1.film_id= f.film_id AND l1.user_id = ?) " +
+                "JOIN FILM_LIKE l2 on (l2.film_id= f.film_id AND l2.user_id = ?) " +
+                "LEFT JOIN " +
+                "(SELECT film_id, COUNT(user_id) as rate " +
+                "FROM FILM_LIKE " +
+                "GROUP BY film_id) fl ON (fl.film_id = f.film_id) " +
+                "ORDER BY fl.rate DESC ";
+        return jdbcTemplate.query(searchFilmsSql, this::makeFilm, idUser, idFriend);
     }
 
     @Override

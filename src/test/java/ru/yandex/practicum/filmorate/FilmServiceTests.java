@@ -6,7 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDao;
@@ -83,7 +87,17 @@ public class FilmServiceTests {
 
         filmService.addFilm(secondFilm);
         films = filmService.getFilms();
-        assertThat(films).contains(secondFilm);
+        assertThat(films).contains(firstFilm);
+    }
+
+    @Test
+    public void shouldDeleteFilm() {
+        Film film = filmService.addFilm(firstFilm);
+        List<Film> films = filmService.getFilms();
+        assertThat(films).contains(firstFilm);
+        filmService.delete(film.getId());
+        films = filmService.getFilms();
+        assertThat(films).doesNotContain(film);
     }
 
     @Test
@@ -149,18 +163,18 @@ public class FilmServiceTests {
         filmService.addLike(thirdFilm.getId(), thirdUser.getId());
         filmService.addLike(secondFilm.getId(), secondUser.getId());
 
-        List<Film> popularFilm = filmService.getPopularFilms(10);
+        List<Film> popularFilm = filmService.getPopularFilm(10, 1, 2000);
 
-        assertThat(popularFilm.size()).isEqualTo(3);
+        assertThat(popularFilm.size()).isEqualTo(1);
         assertThat(popularFilm.get(0)).isEqualTo(filmService.getFilmById(firstFilm.getId()));
 
         filmService.deleteLike(firstFilm.getId(), firstUser.getId());
         filmService.deleteLike(firstFilm.getId(), secondUser.getId());
         filmService.deleteLike(firstFilm.getId(), thirdUser.getId());
 
-        popularFilm = filmService.getPopularFilms(10);
+        popularFilm = filmService.getPopularFilm(10, 3, 2008);
 
-        assertThat(popularFilm.size()).isEqualTo(3);
+        assertThat(popularFilm.size()).isEqualTo(1);
         assertThat(popularFilm.get(0)).isEqualTo(filmService.getFilmById(thirdFilm.getId()));
     }
 

@@ -6,10 +6,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.BadRequestException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDao;
+import ru.yandex.practicum.filmorate.storage.feed.EventDao;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeDao;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
 
@@ -18,14 +21,20 @@ import java.util.List;
 public class FilmService {
 
     private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
     private final LikeDao likeDao;
     private final DirectorDao directorDao;
+    private final EventDao eventDao;
+
 
     @Autowired
-    public FilmService(@Qualifier("filmBdStorage") FilmStorage filmStorage, LikeDao likeDao, DirectorDao directorDao) {
+    public FilmService(@Qualifier("filmBdStorage") FilmStorage filmStorage, UserStorage userStorage,
+                       LikeDao likeDao, DirectorDao directorDao, EventDao eventDao) {
         this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
         this.likeDao = likeDao;
         this.directorDao = directorDao;
+        this.eventDao = eventDao;
     }
 
     public List<Film> getFilms() {
@@ -48,10 +57,15 @@ public class FilmService {
         return filmStorage.getFilmById(id);
     }
 
+    public void delete(Long id) {
+        filmStorage.delete(id);
+    }
+
     public void addLike(Long id, Long userId) {
         Film film = filmStorage.getFilmById(id);
         if (film != null) {
             likeDao.addLike(id, userId);
+            eventDao.addEvent(new Event(userId, id, "LIKE", "ADD"));
             log.info("Добавлен лайк: фильм {}, пользователь id={}", film.getName(), userId);
         }
     }
@@ -61,6 +75,7 @@ public class FilmService {
         if (film != null) {
             if (film.getLikes().contains(userId)) {
                 likeDao.deleteLike(id, userId);
+                eventDao.addEvent(new Event(userId, id, "LIKE", "REMOVE"));
                 log.info("Удален лайк: фильм {}, пользователь id={}", film.getName(), userId);
             } else {
                 throw new NotFoundException("Лайк от указанного пользователя не найден");
@@ -68,8 +83,8 @@ public class FilmService {
         }
     }
 
-    public List<Film> getPopularFilms(int count) {
-        return filmStorage.getPopularFilms(count);
+    public List<Film> getPopularFilm(int count, Integer genreId, Integer year) {
+        return filmStorage.getPopularFilm(count, genreId, year);
     }
 
     public List<Film> getDirectorFilms(Integer directorId, String sortBy) {
@@ -82,6 +97,12 @@ public class FilmService {
         directorDao.updateFilmDirector(film);
         film.getDirectors().clear();
         film.getDirectors().addAll(directorDao.getFilmDirector(filmId));
+    }
+
+    public List<Film> getCommonFilms(Long idUser, Long idFriend) {
+        userStorage.getUserById(idUser);
+        userStorage.getUserById(idFriend);
+        return filmStorage.getCommonFilms(idUser, idFriend);
     }
 
     public List<Film> search(String query, String groupBy) {

@@ -180,10 +180,9 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> searchByTitleAndDirector(String query) {
         String sql = "select * from film as f, film_director as fd, director as d " +
                 "where (locate(?, lower(f.name)) > 0 or (f.film_id = fd.film_id and fd.director_id = d.director_id and locate(?, lower(d.name)) > 0))";
-        List<Film> ans = jdbcTemplate.query(sql, this::makeFilm, query.toLowerCase(), query.toLowerCase());
-        HashSet<Film> uniqueList = new HashSet<>(ans);
-        ans = new ArrayList<>();
-        ans.addAll(uniqueList);
+        List<Film> ans = jdbcTemplate.query(sql, this::makeFilm, query.toLowerCase(), query.toLowerCase()).stream()
+                .distinct()
+                .collect(Collectors.toList());
         Collections.reverse(ans);
         return ans;
     }

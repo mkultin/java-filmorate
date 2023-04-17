@@ -5,8 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDao;
+import ru.yandex.practicum.filmorate.storage.feed.EventDao;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeDao;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -21,14 +23,17 @@ public class FilmService {
     private final UserStorage userStorage;
     private final LikeDao likeDao;
     private final DirectorDao directorDao;
+    private final EventDao eventDao;
 
 
     @Autowired
-    public FilmService(@Qualifier("filmBdStorage") FilmStorage filmStorage, UserStorage userStorage, LikeDao likeDao, DirectorDao directorDao) {
+    public FilmService(@Qualifier("filmBdStorage") FilmStorage filmStorage, UserStorage userStorage,
+                       LikeDao likeDao, DirectorDao directorDao, EventDao eventDao) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.likeDao = likeDao;
         this.directorDao = directorDao;
+        this.eventDao = eventDao;
     }
 
     public List<Film> getFilms() {
@@ -59,6 +64,7 @@ public class FilmService {
         Film film = filmStorage.getFilmById(id);
         if (film != null) {
             likeDao.addLike(id, userId);
+            eventDao.addEvent(new Event(userId, id, "LIKE", "ADD"));
             log.info("Добавлен лайк: фильм {}, пользователь id={}", film.getName(), userId);
         }
     }
@@ -68,6 +74,7 @@ public class FilmService {
         if (film != null) {
             if (film.getLikes().contains(userId)) {
                 likeDao.deleteLike(id, userId);
+                eventDao.addEvent(new Event(userId, id, "LIKE", "REMOVE"));
                 log.info("Удален лайк: фильм {}, пользователь id={}", film.getName(), userId);
             } else {
                 throw new NotFoundException("Лайк от указанного пользователя не найден");

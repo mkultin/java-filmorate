@@ -19,10 +19,7 @@ import ru.yandex.practicum.filmorate.storage.rating.MpaDao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Primary
@@ -197,5 +194,29 @@ public class FilmDbStorage implements FilmStorage {
                 "GROUP BY film_id) fl ON (fl.film_id = f.film_id) " +
                 "ORDER BY fl.rate DESC ";
         return jdbcTemplate.query(searchFilmsSql, this::makeFilm, idUser, idFriend);
+    }
+
+    @Override
+    public List<Film> searchByTitle(String query) {
+        String sql = "SELECT * FROM FILM WHERE LOCATE(?, LOWER(NAME)) > 0";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs, rowNum), query.toLowerCase());
+    }
+
+    @Override
+    public List<Film> searchByDirector(String query) {
+        String sql = "select * from film as f, film_director as fd, director as d " +
+                "where f.film_id = fd.film_id and fd.director_id = d.director_id and locate(?, lower(d.name)) > 0";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs, rowNum), query.toLowerCase());
+    }
+
+    @Override
+    public List<Film> searchByTitleAndDirector(String query) {
+        String sql = "select * from film as f, film_director as fd, director as d " +
+                "where (locate(?, lower(f.name)) > 0 or (f.film_id = fd.film_id and fd.director_id = d.director_id and locate(?, lower(d.name)) > 0))";
+        List<Film> ans = jdbcTemplate.query(sql, this::makeFilm, query.toLowerCase(), query.toLowerCase()).stream()
+                .distinct()
+                .collect(Collectors.toList());
+        Collections.reverse(ans);
+        return ans;
     }
 }

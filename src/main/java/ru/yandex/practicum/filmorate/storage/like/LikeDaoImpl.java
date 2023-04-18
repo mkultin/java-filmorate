@@ -24,7 +24,7 @@ public class LikeDaoImpl implements LikeDao {
 
     @Override
     public void addLike(Long filmId, Long userId) {
-        String sqlQuery = "INSERT INTO film_like (film_id, user_id) VALUES (?, ?)";
+        String sqlQuery = "MERGE INTO film_like (film_id, user_id) VALUES (?, ?)";
         jdbcTemplate.update(sqlQuery, filmId, userId);
     }
 

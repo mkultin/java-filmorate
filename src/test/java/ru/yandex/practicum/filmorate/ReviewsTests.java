@@ -118,7 +118,7 @@ public class ReviewsTests {
         review3.setUserId(user2.getId());
         review3 = reviewService.create(review3);
 
-        List<Review> reviewList = reviewService.getReviews(4);
+        List<Review> reviewList = reviewService.getReviews(0L, 4);
 
         assertThat(reviewList.size()).isEqualTo(3);
 
@@ -127,12 +127,12 @@ public class ReviewsTests {
         reviewService.addDislike(review1.getReviewId(), user2.getId());
         review1 = reviewService.findById(review1.getReviewId());
 
-        reviewList = reviewService.getReviews(3);
+        reviewList = reviewService.getReviews(0L, 3);
         assertThat(reviewList.get(0)).isEqualTo(review2);
         assertThat(reviewList.get(1)).isEqualTo(review3);
         assertThat(reviewList.get(2)).isEqualTo(review1);
 
-        reviewList = reviewService.getReviewsByFilmId(film1.getId(), 10);
+        reviewList = reviewService.getReviews(film1.getId(), 10);
         assertThat(reviewList.get(0)).isEqualTo(review3);
         assertThat(reviewList.size()).isEqualTo(2);
 
@@ -144,7 +144,7 @@ public class ReviewsTests {
 
         reviewService.delete(review1.getReviewId());
 
-        reviewList = reviewService.getReviews(3);
+        reviewList = reviewService.getReviews(0L, 3);
         assertThat(reviewList.size()).isEqualTo(2);
     }
 }

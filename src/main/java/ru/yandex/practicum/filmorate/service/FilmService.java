@@ -94,6 +94,10 @@ public class FilmService {
 
     private void setFilmDirector(Film film) {
         Long filmId = film.getId();
+        directorDao.deleteFilmDirectors(filmId);
+        if (film.getDirectors() == null) {
+            return;
+        }
         directorDao.updateFilmDirector(film);
         film.getDirectors().clear();
         film.getDirectors().addAll(directorDao.getFilmDirector(filmId));

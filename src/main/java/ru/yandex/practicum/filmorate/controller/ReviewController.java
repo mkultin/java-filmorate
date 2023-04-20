@@ -38,11 +38,7 @@ public class ReviewController {
     @GetMapping
     List<Review> getReviews(@RequestParam(value = "filmId", defaultValue = "0") Long filmId,
                             @RequestParam(value = "count", defaultValue = "10") int count) {
-        if (filmId <= 0) {
-            return reviewService.getReviews(count);
-        } else {
-            return reviewService.getReviewsByFilmId(filmId, count);
-        }
+        return reviewService.getReviews(filmId, count);
     }
 
     @PutMapping("/{id}/like/{userId}")

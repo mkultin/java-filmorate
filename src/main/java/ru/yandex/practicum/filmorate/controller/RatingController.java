@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.rating.MpaDao;
+import ru.yandex.practicum.filmorate.service.RatingService;
 
 import java.util.List;
 
@@ -15,16 +15,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RatingController {
 
-    private final MpaDao mpaDao;
+    private final RatingService ratingService;
 
     @GetMapping
     public List<Mpa> getRatings() {
-        return mpaDao.findAll();
+        return ratingService.getRatings();
     }
 
     @GetMapping("/{id}")
     public Mpa getRatingById(@PathVariable Integer id) {
-        return mpaDao.findById(id);
+        return ratingService.getRatingById(id);
     }
 
 }

@@ -31,6 +31,7 @@ public class DirectorDaoImpl implements DirectorDao {
     @Override
     public List<Director> findAll() {
         String sql = "SELECT * FROM director";
+        log.info("Получены все режиссеры.");
         return jdbcTemplate.query(sql, this::makeDirector);
     }
 
@@ -39,6 +40,7 @@ public class DirectorDaoImpl implements DirectorDao {
         String sql = "SELECT * FROM director WHERE director_id = ?";
         SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, id);
         if (sqlRowSet.next()) {
+            log.info("Получен режиссер id = {}.", id);
             return jdbcTemplate.queryForObject(sql, this::makeDirector, id);
         } else {
             throw new NotFoundException("Режиссер не найден");
@@ -61,6 +63,7 @@ public class DirectorDaoImpl implements DirectorDao {
         String sqlQuery = "UPDATE director SET name = ? WHERE director_id = ?";
         int queryResult = jdbcTemplate.update(sqlQuery, director.getName(), director.getId());
         validateQueryResult(queryResult);
+        log.info("Обновлен режиссер {}, id = {}", director.getName(), director.getId());
         return director;
     }
 
@@ -82,15 +85,12 @@ public class DirectorDaoImpl implements DirectorDao {
     public void deleteFilmDirectors(Long filmId) {
         String sqlQuery = "DELETE FROM film_director WHERE film_id = ?";
         jdbcTemplate.update(sqlQuery, filmId);
+        log.info("Удален список режиссеров для фильма id = {}", filmId);
     }
 
     @Override
     public void updateFilmDirector(Film film) {
         Long filmId = film.getId();
-        deleteFilmDirectors(filmId);
-        if (film.getDirectors() == null) {
-            return;
-        }
         List<Object[]> batch = new ArrayList<>();
         for (Director director : film.getDirectors()) {
             Object[] values = new Object[]{filmId, director.getId()};
@@ -99,6 +99,7 @@ public class DirectorDaoImpl implements DirectorDao {
         String sqlQuery = "INSERT INTO film_director (film_id, director_id) " +
                 "VALUES(?, ?)";
         jdbcTemplate.batchUpdate(sqlQuery, batch);
+        log.info("Обновлен список режиссеров для фильма id = {}", filmId);
     }
 
     private Director makeDirector(ResultSet resultSet, int rowNum) throws SQLException {

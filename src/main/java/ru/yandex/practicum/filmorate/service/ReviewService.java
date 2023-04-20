@@ -82,9 +82,8 @@ public class ReviewService {
     public List<Review> getReviews(Long filmId, int count) {
         if (filmId <= 0) {
             return reviewDao.getReviews(count);
-        } else {
-            return reviewDao.getReviewsByFilmId(filmId, count);
         }
+        return reviewDao.getReviewsByFilmId(filmId, count);
     }
 
     private void validateReview(Review review) {

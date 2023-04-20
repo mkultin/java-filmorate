@@ -3,8 +3,10 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.event.EventType;
+import ru.yandex.practicum.filmorate.model.event.Operation;
 import ru.yandex.practicum.filmorate.storage.feed.EventDao;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.review.ReviewDao;
@@ -33,14 +35,14 @@ public class ReviewService {
         validateReview(review);
         Review reviewCreated = reviewDao.create(review);
         eventDao.addEvent(new Event(reviewCreated.getUserId(),
-                reviewCreated.getReviewId(), "REVIEW", "ADD"));
+                reviewCreated.getReviewId(), EventType.REVIEW, Operation.ADD));
         return reviewCreated;
     }
 
     public Review update(Review review) {
         Review reviewToUpdate = findById(review.getReviewId());
         eventDao.addEvent(new Event(reviewToUpdate.getUserId(),
-                reviewToUpdate.getReviewId(), "REVIEW", "UPDATE"));
+                reviewToUpdate.getReviewId(), EventType.REVIEW, Operation.UPDATE));
         // в ивенты добавляются данные (а именно userId) из отзыва до обновления – так хочет постман
         return reviewDao.update(review);
     }
@@ -48,7 +50,7 @@ public class ReviewService {
     public void delete(Long reviewId) {
         Review review = findById(reviewId);
         eventDao.addEvent(new Event(review.getUserId(),
-                review.getReviewId(), "REVIEW", "REMOVE"));
+                review.getReviewId(), EventType.REVIEW, Operation.REMOVE));
         reviewDao.delete(reviewId);
     }
 

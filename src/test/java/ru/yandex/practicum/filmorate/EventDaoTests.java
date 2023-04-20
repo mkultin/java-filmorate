@@ -6,7 +6,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
-import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.event.Event;
+import ru.yandex.practicum.filmorate.model.event.EventType;
+import ru.yandex.practicum.filmorate.model.event.Operation;
 import ru.yandex.practicum.filmorate.storage.feed.EventDao;
 import ru.yandex.practicum.filmorate.storage.feed.EventDaoImpl;
 
@@ -38,38 +40,38 @@ class EventDaoTests {
         event1 = Event.builder()
                 .userId(1)
                 .entityId(1)
-                .eventType("LIKE")
-                .operation("ADD")
+                .eventType(EventType.LIKE)
+                .operation(Operation.ADD)
                 .timestamp(Timestamp.valueOf("2023-01-01 12:00:00"))
                 .build();
 
         event2 = Event.builder()
                 .userId(1)
                 .entityId(2)
-                .eventType("FRIEND")
-                .operation("ADD")
+                .eventType(EventType.FRIEND)
+                .operation(Operation.ADD)
                 .timestamp(Timestamp.valueOf("2023-01-01 12:30:00"))
                 .build();
 
         event3 = Event.builder()
                 .userId(1)
                 .entityId(55)
-                .eventType("REVIEW")
-                .operation("UPDATE")
+                .eventType(EventType.REVIEW)
+                .operation(Operation.UPDATE)
                 .timestamp(Timestamp.valueOf("2023-02-02 12:00:00"))
                 .build();
     }
 
     @Test
     void getFeedShouldReturnUserFeed() {
-        jdbcTemplate.update("insert into event (user_id, entity_id, type_id, operation_id, event_timestamp) " +
-                "values (1, 1, 1, 2, '2023-01-01 12:00:00')");
+        jdbcTemplate.update("insert into event (user_id, entity_id, event_type, operation, create_time) " +
+                "values (1, 1, 'LIKE', 'ADD', '2023-01-01 12:00:00')");
 
-        jdbcTemplate.update("insert into event (user_id, entity_id, type_id, operation_id, event_timestamp) " +
-                "values (1, 2, 3, 2, '2023-01-01 12:30:00')");
+        jdbcTemplate.update("insert into event (user_id, entity_id, event_type, operation, create_time) " +
+                "values (1, 2, 'FRIEND', 'ADD', '2023-01-01 12:30:00')");
 
-        jdbcTemplate.update("insert into event (user_id, entity_id, type_id, operation_id, event_timestamp) " +
-                "values (1, 55, 2, 3, '2023-02-02 12:00:00')");
+        jdbcTemplate.update("insert into event (user_id, entity_id, event_type, operation, create_time) " +
+                "values (1, 55, 'REVIEW', 'UPDATE', '2023-02-02 12:00:00')");
 
         event1.setEventId(1);
         event2.setEventId(2);

@@ -162,7 +162,7 @@ public class FilmDbStorage implements FilmStorage {
         film.getLikes().addAll(likeDao.getFilmLikes(film.getId()));
         film.getGenres().addAll(genreDao.getFilmGenres(film.getId()));
         film.getDirectors().addAll(directorDao.getFilmDirector(film.getId()));
-        return film;
+        return film; //
     }
 
     private void setFilmGenres(Film film) {

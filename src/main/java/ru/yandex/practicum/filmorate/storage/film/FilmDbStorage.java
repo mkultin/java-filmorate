@@ -165,16 +165,19 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> searchByDirector(String query) {
         String sql = "select * from film as f " +
                 "LEFT JOIN rating AS r ON f.rating_id = r.rating_id " +
-                "LEFT JOIN (SELECT d.name FROM director as d RIGHT JOIN film_director AS fd ON fd.director_id = d.director_id) as fdj ON fdj.film_id = f.film_id " +
+                "LEFT JOIN film_director as fd ON fd.film_id = f.film_id " +
+                "LEFT JOIN director AS d ON fd.director_id = d.director_id " +
                 "where locate(?, lower(d.name)) > 0";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs, rowNum), query.toLowerCase());
     }
 
     @Override
     public List<Film> searchByTitleAndDirector(String query) {
-        String sql = "select * from film as f, film_director as fd, director as d " +
+        String sql = "select * from film as f " +
                 "LEFT JOIN rating AS r ON f.rating_id = r.rating_id " +
-                "where (locate(?, lower(f.name)) > 0 or (f.film_id = fd.film_id and fd.director_id = d.director_id and locate(?, lower(d.name)) > 0))";
+                "LEFT JOIN film_director as fd ON fd.film_id = f.film_id " +
+                "LEFT JOIN director AS d ON fd.director_id = d.director_id " +
+                "where (locate(?, lower(f.name)) > 0 or locate(?, lower(d.name)) > 0)";
         List<Film> ans = jdbcTemplate.query(sql, this::makeFilm, query.toLowerCase(), query.toLowerCase()).stream()
                 .distinct()
                 .collect(Collectors.toList());

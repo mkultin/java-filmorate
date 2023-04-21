@@ -168,7 +168,7 @@ public class FilmDbStorage implements FilmStorage {
                 "LEFT JOIN film_director as fd ON fd.film_id = f.film_id " +
                 "LEFT JOIN director AS d ON fd.director_id = d.director_id " +
                 "where locate(?, lower(d.name)) > 0";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> makeFilm(rs, rowNum), query.toLowerCase());
+        return jdbcTemplate.query(sql, this::makeFilm, query.toLowerCase());
     }
 
     @Override

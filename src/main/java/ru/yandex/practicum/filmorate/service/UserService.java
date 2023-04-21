@@ -5,9 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.event.EventType;
+import ru.yandex.practicum.filmorate.model.event.Operation;
 import ru.yandex.practicum.filmorate.storage.feed.EventDao;
 import ru.yandex.practicum.filmorate.storage.friend.FriendDao;
 import ru.yandex.practicum.filmorate.storage.like.LikeDao;
@@ -61,7 +63,7 @@ public class UserService {
         User friendUser = userBdStorage.getUserById(friendId);
 
         friendDao.addFriend(user, friendUser);
-        eventDao.addEvent(new Event(id, friendId, "FRIEND", "ADD"));
+        eventDao.addEvent(new Event(id, friendId, EventType.FRIEND, Operation.ADD));
         log.info("Для пользователя id={} добавлен друг id={}", id, friendId);
     }
 
@@ -70,7 +72,7 @@ public class UserService {
         User friendUser = userBdStorage.getUserById(friendId);
 
         friendDao.deleteFriend(user, friendUser);
-        eventDao.addEvent(new Event(id, friendId, "FRIEND", "REMOVE"));
+        eventDao.addEvent(new Event(id, friendId, EventType.FRIEND, Operation.REMOVE));
         log.info("У пользователя id={} удален друг id={}", id, friendId);
     }
 

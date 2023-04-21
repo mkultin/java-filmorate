@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.BadRequestException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.event.EventType;
+import ru.yandex.practicum.filmorate.model.event.Operation;
 import ru.yandex.practicum.filmorate.storage.director.DirectorDao;
 import ru.yandex.practicum.filmorate.storage.feed.EventDao;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -65,7 +67,7 @@ public class FilmService {
         Film film = filmStorage.getFilmById(id);
         if (film != null) {
             likeDao.addLike(id, userId);
-            eventDao.addEvent(new Event(userId, id, "LIKE", "ADD"));
+            eventDao.addEvent(new Event(userId, id, EventType.LIKE, Operation.ADD));
             log.info("Добавлен лайк: фильм {}, пользователь id={}", film.getName(), userId);
         }
     }
@@ -75,7 +77,7 @@ public class FilmService {
         if (film != null) {
             if (film.getLikes().contains(userId)) {
                 likeDao.deleteLike(id, userId);
-                eventDao.addEvent(new Event(userId, id, "LIKE", "REMOVE"));
+                eventDao.addEvent(new Event(userId, id, EventType.LIKE, Operation.REMOVE));
                 log.info("Удален лайк: фильм {}, пользователь id={}", film.getName(), userId);
             } else {
                 throw new NotFoundException("Лайк от указанного пользователя не найден");

@@ -3,8 +3,11 @@ package ru.yandex.practicum.filmorate.storage.feed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.event.Event;
+import ru.yandex.practicum.filmorate.model.event.EventType;
+import ru.yandex.practicum.filmorate.model.event.Operation;
 
+import javax.validation.Valid;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -20,37 +23,34 @@ public class EventDaoImpl implements EventDao {
 
     @Override
     public List<Event> getFeed(long userId) {
-        String sqlQuery = "SELECT e.event_timestamp, e.user_id, e.event_id, " +
-                "e.entity_id, et.name AS event_type, o.name AS operation " +
-                "FROM event e " +
-                "JOIN event_type et ON e.type_id = et.type_id " +
-                "JOIN operation o ON e.operation_id = o.operation_id " +
+        String sqlQuery = "SELECT create_time, user_id, event_id, " +
+                "entity_id, event_type, operation " +
+                "FROM event " +
                 "WHERE user_id = ?" +
-                "ORDER BY e.event_timestamp";
+                "ORDER BY create_time";
 
         return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeEvent(rs), userId);
     }
 
     @Override
-    public void addEvent(Event event) {
-        String sqlQuery = "INSERT INTO event (user_id, entity_id, type_id, operation_id, event_timestamp) " +
-                "VALUES (?, ?, (SELECT type_id FROM event_type WHERE name = ?), " +
-                "(SELECT operation_id FROM operation WHERE name = ?), ?)";
+    public void addEvent(@Valid Event event) {
+        String sqlQuery = "INSERT INTO event (user_id, entity_id, event_type, operation, create_time) " +
+                "VALUES (?, ?, ?, ?, ?)";
 
         jdbcTemplate.update(sqlQuery,
                 event.getUserId(),
                 event.getEntityId(),
-                event.getEventType(),
-                event.getOperation(),
+                event.getEventType().name(),
+                event.getOperation().name(),
                 event.getTimestamp());
     }
 
     private Event makeEvent(ResultSet rs) throws SQLException {
         return Event.builder()
-                .timestamp(rs.getTimestamp("event_timestamp"))
+                .timestamp(rs.getTimestamp("create_time"))
                 .userId(rs.getLong("user_id"))
-                .eventType(rs.getString("event_type"))
-                .operation(rs.getString("operation"))
+                .eventType(EventType.valueOf(rs.getString("event_type")))
+                .operation(Operation.valueOf(rs.getString("operation")))
                 .eventId(rs.getLong("event_id"))
                 .entityId(rs.getLong("entity_id"))
                 .build();

@@ -4,9 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.director.DirectorDao;
-import ru.yandex.practicum.filmorate.storage.genre.GenreDao;
-import ru.yandex.practicum.filmorate.storage.rating.MpaDao;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,9 +16,6 @@ import java.util.Set;
 public class LikeDaoImpl implements LikeDao {
 
     private final JdbcTemplate jdbcTemplate;
-    private final MpaDao mpaDao;
-    private final GenreDao genreDao;
-    private final DirectorDao directorDao;
 
     @Override
     public void addLike(Long filmId, Long userId) {
@@ -43,7 +38,8 @@ public class LikeDaoImpl implements LikeDao {
     @Override
     public Set<Film> getRecommendedFilms(Long userId) {
         String sqlQuery = "SELECT * " +
-                "FROM film " +
+                "FROM film AS f " +
+                "LEFT JOIN rating AS r ON f.rating_id = r.rating_id " +
                 "WHERE film_id IN (" +
                 "SELECT film_id " +
                 "FROM film_like " +
@@ -65,11 +61,11 @@ public class LikeDaoImpl implements LikeDao {
                 .description(resultSet.getString("description"))
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
                 .duration(resultSet.getInt("duration"))
-                .mpa(mpaDao.findById(resultSet.getInt("rating_id")))
+                .mpa(new Mpa(
+                        resultSet.getInt("film.rating_id"),
+                        resultSet.getString("rating.name")
+                ))
                 .build();
-        film.getLikes().addAll(getFilmLikes(film.getId()));
-        film.getGenres().addAll(genreDao.getFilmGenres(film.getId()));
-        film.getDirectors().addAll(directorDao.getFilmDirector(film.getId()));
         return film;
     }
 }

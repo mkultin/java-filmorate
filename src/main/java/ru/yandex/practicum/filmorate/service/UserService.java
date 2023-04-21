@@ -36,8 +36,10 @@ public class UserService {
 
     public List<User> getUsers() {
         return userBdStorage.getUsers().stream()
-                .map(user -> {user.getFriends().addAll(friendDao.getFriends(user.getId()));
-                return user;})
+                .map(user -> {
+                    user.getFriends().addAll(friendDao.getFriends(user.getId()));
+                    return user;
+                } )
                 .collect(Collectors.toList());
     }
 
@@ -99,8 +101,10 @@ public class UserService {
                     .filter(secondUserFriends::contains)
                     .collect(Collectors.toSet());
             return userBdStorage.getUsersByIds(commonFriends).stream()
-                    .map(user -> {user.getFriends().addAll(friendDao.getFriends(user.getId()));
-                        return user;})
+                    .map(user -> {
+                        user.getFriends().addAll(friendDao.getFriends(user.getId()));
+                        return user;
+                    } )
                     .collect(Collectors.toList());
         } else {
             throw new NotFoundException(ERROR_MESSAGE);

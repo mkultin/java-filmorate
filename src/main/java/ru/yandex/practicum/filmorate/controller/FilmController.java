@@ -20,7 +20,7 @@ public class FilmController {
 
     @GetMapping
     public List<Film> getFilms() {
-        log.info("GET /films : get list of all films");
+        log.debug("GET /films : get list of all films");
         return filmService.getFilms();
     }
 

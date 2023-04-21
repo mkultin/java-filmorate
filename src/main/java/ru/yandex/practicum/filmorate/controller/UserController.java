@@ -22,7 +22,7 @@ public class UserController {
 
     @GetMapping
     public List<User> getUsers() {
-        log.info("GET /users : get list of all users");
+        log.debug("GET /users : get list of all users");
         return userService.getUsers();
     }
 

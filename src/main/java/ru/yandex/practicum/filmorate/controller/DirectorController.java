@@ -19,7 +19,7 @@ public class DirectorController {
 
     @GetMapping
     public List<Director> getDirectors() {
-        log.info("GET /directors : get list of all directors");
+        log.debug("GET /directors : get list of all directors");
         return directorService.getDirectors();
     }
 

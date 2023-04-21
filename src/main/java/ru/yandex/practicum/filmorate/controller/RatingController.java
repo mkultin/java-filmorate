@@ -21,7 +21,7 @@ public class RatingController {
 
     @GetMapping
     public List<Mpa> getRatings() {
-        log.info("GET /mpa : get list of all Ratings");
+        log.debug("GET /mpa : get list of all Ratings");
         return ratingService.getRatings();
     }
 

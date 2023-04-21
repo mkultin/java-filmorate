@@ -12,8 +12,8 @@ import java.sql.Timestamp;
 import java.time.Instant;
 
 @Data
-@Builder
 @AllArgsConstructor
+@Builder
 public class Event {
     @PastOrPresent(message = "Некорректное время события")
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_INT)

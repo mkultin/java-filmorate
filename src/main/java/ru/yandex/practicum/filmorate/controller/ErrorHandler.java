@@ -16,6 +16,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final NotFoundException exception) {
+        log.warn(exception.getMessage(), exception);
         return new ErrorResponse(exception.getMessage());
     }
 

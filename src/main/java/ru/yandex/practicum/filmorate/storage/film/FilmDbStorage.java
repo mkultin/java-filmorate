@@ -178,11 +178,11 @@ public class FilmDbStorage implements FilmStorage {
                 "LEFT JOIN film_director as fd ON fd.film_id = f.film_id " +
                 "LEFT JOIN director AS d ON fd.director_id = d.director_id " +
                 "where (locate(?, lower(f.name)) > 0 or locate(?, lower(d.name)) > 0)";
-        List<Film> ans = jdbcTemplate.query(sql, this::makeFilm, query.toLowerCase(), query.toLowerCase()).stream()
+        List<Film> films = jdbcTemplate.query(sql, this::makeFilm, query.toLowerCase(), query.toLowerCase()).stream()
                 .distinct()
                 .collect(Collectors.toList());
-        Collections.reverse(ans);
-        return ans;
+        Collections.reverse(films);
+        return films;
     }
 
     private Film makeFilm(ResultSet resultSet, int rowNum) throws SQLException {

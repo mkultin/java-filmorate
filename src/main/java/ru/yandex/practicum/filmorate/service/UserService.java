@@ -39,7 +39,7 @@ public class UserService {
                 .map(user -> {
                     user.getFriends().addAll(friendDao.getFriends(user.getId()));
                     return user;
-                } )
+                })
                 .collect(Collectors.toList());
     }
 
@@ -104,7 +104,7 @@ public class UserService {
                     .map(user -> {
                         user.getFriends().addAll(friendDao.getFriends(user.getId()));
                         return user;
-                    } )
+                    })
                     .collect(Collectors.toList());
         } else {
             throw new NotFoundException(ERROR_MESSAGE);

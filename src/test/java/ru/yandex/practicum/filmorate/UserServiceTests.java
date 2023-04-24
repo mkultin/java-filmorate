@@ -6,11 +6,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,6 +28,7 @@ public class UserServiceTests {
     private User secondUser;
     private User thirdUser;
     private final UserService userService;
+    private final FilmService filmService;
 
     @BeforeEach
     public void beforeEach() {
@@ -71,6 +77,16 @@ public class UserServiceTests {
     }
 
     @Test
+    public void shouldDeleteUser() {
+        User user = userService.addUser(firstUser);
+        List<User> users = userService.getUsers();
+        assertThat(users).contains(firstUser);
+        userService.delete(user.getId());
+        users = userService.getUsers();
+        assertThat(users).doesNotContain(user);
+    }
+
+    @Test
     public void shouldUpdateUser() {
         userService.addUser(firstUser);
         User userToUpd = User.builder()
@@ -114,5 +130,62 @@ public class UserServiceTests {
 
         friends = userService.getFriends(firstUser.getId());
         assertThat(friends.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void shouldGetRecommendedFilms() {
+        userService.addUser(firstUser);
+        userService.addUser(secondUser);
+
+        Set<Film> films = userService.getRecommendedFilms(firstUser.getId());
+        assertThat(films.size()).isEqualTo(0);
+
+        Film firstFilm = Film.builder()
+                .name("The First Film")
+                .description("Description of The First Film")
+                .releaseDate(LocalDate.of(2000, 2, 4))
+                .duration(120)
+                .mpa(new Mpa(1, "Комедия"))
+                .build();
+        firstFilm.getGenres().add(new Genre(1, "G"));
+
+        Film secondFilm = Film.builder()
+                .name("The Second Film")
+                .description("Description of The Second Film")
+                .releaseDate(LocalDate.of(2004, 4, 8))
+                .duration(140)
+                .mpa(new Mpa(2, "Драма"))
+                .build();
+        secondFilm.getGenres().add(new Genre(2, "PG"));
+
+        filmService.addFilm(firstFilm);
+        filmService.addFilm(secondFilm);
+
+        filmService.addLike(firstFilm.getId(), firstUser.getId());
+        filmService.addLike(firstFilm.getId(), secondUser.getId());
+        films = userService.getRecommendedFilms(firstUser.getId());
+        assertThat(films.size()).isEqualTo(0);
+
+        filmService.addLike(secondFilm.getId(), secondUser.getId());
+        films = userService.getRecommendedFilms(firstUser.getId());
+        assertThat(films.size()).isEqualTo(1);
+
+        filmService.addLike(secondFilm.getId(), firstUser.getId());
+        films = userService.getRecommendedFilms(firstUser.getId());
+        assertThat(films.size()).isEqualTo(0);
+
+        Film thirdFilm = Film.builder()
+                .name("The Third Film")
+                .description("Description of The Third Film")
+                .releaseDate(LocalDate.of(2008, 6, 12))
+                .duration(160)
+                .mpa(new Mpa(3, "Мультфильм"))
+                .build();
+        thirdFilm.getGenres().add(new Genre(3, "PG-13"));
+        filmService.addFilm(thirdFilm);
+
+        filmService.addLike(thirdFilm.getId(), firstUser.getId());
+        films = userService.getRecommendedFilms(firstUser.getId());
+        assertThat(films.size()).isEqualTo(0);
     }
 }

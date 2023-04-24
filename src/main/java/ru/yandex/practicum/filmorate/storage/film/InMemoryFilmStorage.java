@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (films.containsKey(id)) {
             return films.get(id);
         } else {
-            throw new FilmNotFoundException("Фильм с id= " + id + "не найден.");
+            throw new NotFoundException("Фильм с id= " + id + "не найден.");
         }
     }
 
@@ -46,7 +46,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             films.put(film.getId(), film);
             log.info("Обновлен фильм {}, id={}", film.getName(), film.getId());
         } else {
-            throw new FilmNotFoundException("Фильм с id= " + film.getId() + "не найден.");
+            throw new NotFoundException("Фильм с id= " + film.getId() + "не найден.");
         }
         return film;
     }
@@ -57,12 +57,37 @@ public class InMemoryFilmStorage implements FilmStorage {
             films.remove(id);
             log.info("Удален фильм id={}", id);
         } else {
-            throw new FilmNotFoundException("Фильм с id= " + id + "не найден.");
+            throw new NotFoundException("Фильм с id= " + id + "не найден.");
         }
     }
 
     @Override
-    public List<Film> getPopularFilms(int count) {
+    public List<Film> getPopularFilm(int count, Integer genreId, Integer year) {
+        return null;
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Long idUser, Long idFriend) {
+        return null;
+    }
+
+    @Override
+    public List<Film> getDirectorFilms(Integer directorId, String sortBy) {
+        return null;
+    }
+
+    @Override
+    public List<Film> searchByTitle(String query) {
+        return null;
+    }
+
+    @Override
+    public List<Film> searchByDirector(String query) {
+        return null;
+    }
+
+    @Override
+    public List<Film> searchByTitleAndDirector(String query) {
         return null;
     }
 }
